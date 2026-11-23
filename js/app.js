@@ -59,7 +59,7 @@
       applyTheme();
     });
     matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => applyTheme());
-    document.querySelectorAll('[data-tab-link]').forEach((a) => a.addEventListener('click', () => { tab = a.dataset.tabLink; renderTabs(); renderTab(); }));
+    document.querySelectorAll('[data-tab-link]').forEach((a) => a.addEventListener('click', () => goTab(a.dataset.tabLink)));
   }
 
   /* ---------- compatibility ---------- */
@@ -144,10 +144,84 @@
     ['colours', 'Colours'], ['walls', 'Wallpapers'], ['look', 'Look'], ['anim', 'Motion'],
     ['panels', 'Panels'], ['extras', 'Extras'], ['ideas', 'Inspiration'],
   ];
+  /* The tab strip is one row that slides: the active stage is kept centred, a bar
+     glides to it, and the edges fade while more stages are hidden off to the side. */
+  function goTab(t) {
+    const changed = t !== tab;
+    tab = t;
+    renderTabs();
+    renderTab();
+    if (changed) $('#tabBody').scrollTop = 0;
+  }
   function renderTabs() {
-    $('#tabs').innerHTML = TABS.map(([id, label], i) =>
-      `<button role="tab" data-tab="${id}" aria-selected="${id === tab}"><b>${String(i + 1).padStart(2, '0')}</b><span>${label}</span></button>`).join('');
-    $('#tabs').querySelectorAll('button').forEach((b) => b.addEventListener('click', () => { tab = b.dataset.tab; renderTabs(); renderTab(); }));
+    const strip = $('#tabs');
+    if (strip.dataset.count !== String(TABS.length)) {
+      strip.dataset.count = TABS.length;
+      strip.innerHTML = TABS.map(([id, label], i) =>
+        `<button role="tab" data-tab="${id}" aria-selected="false"><b>${String(i + 1).padStart(2, '0')}</b><span>${label}</span></button>`).join('') +
+        '<i class="tab-ink" aria-hidden="true"></i>';
+      strip.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => goTab(b.dataset.tab)));
+      strip.addEventListener('scroll', () => edgeFades(strip), { passive: true });
+      // a plain mouse wheel scrolls the strip sideways
+      strip.addEventListener('wheel', (e) => {
+        if (Math.abs(e.deltaY) > Math.abs(e.deltaX) && strip.scrollWidth > strip.clientWidth) { strip.scrollLeft += e.deltaY; e.preventDefault(); }
+      }, { passive: false });
+      // arrow keys move between stages, like a proper tab list
+      strip.addEventListener('keydown', (e) => {
+        if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+        const i = TABS.findIndex(([id]) => id === tab) + (e.key === 'ArrowRight' ? 1 : -1);
+        if (TABS[i]) { goTab(TABS[i][0]); strip.querySelector(`[data-tab="${TABS[i][0]}"]`).focus(); e.preventDefault(); }
+      });
+      window.addEventListener('resize', () => { placeInk(strip, false); edgeFades(strip); });
+      // where you are: "Stage 4 of 8 · Look" and a bar with one segment per stage
+      let meter = strip.parentElement.querySelector('.stage-meter');
+      if (!meter) { meter = document.createElement('div'); meter.className = 'stage-meter'; strip.parentElement.appendChild(meter); }
+      meter.innerHTML = `<div class="sm-text"><span class="sm-now"></span><span class="sm-left"></span></div>
+        <div class="sm-bar" role="progressbar" aria-valuemin="1" aria-valuemax="${TABS.length}">${TABS.map(([id, label]) => `<button type="button" data-tab="${id}" title="${label}" aria-label="Go to ${label}"></button>`).join('')}</div>`;
+      meter.querySelectorAll('.sm-bar button').forEach((b) => b.addEventListener('click', () => goTab(b.dataset.tab)));
+    }
+    const idx = TABS.findIndex(([id]) => id === tab);
+    const meter = strip.parentElement.querySelector('.stage-meter');
+    if (meter && idx >= 0) {
+      const left = TABS.length - 1 - idx;
+      meter.querySelector('.sm-now').innerHTML = `Stage ${idx + 1} of ${TABS.length} <b>${TABS[idx][1]}</b>`;
+      meter.querySelector('.sm-left').textContent = left ? `${left} stage${left > 1 ? 's' : ''} left` : 'Last stage';
+      meter.querySelectorAll('.sm-bar button').forEach((b, i) => { b.classList.toggle('done', i < idx); b.classList.toggle('on', i === idx); });
+      const bar = meter.querySelector('.sm-bar');
+      bar.setAttribute('aria-valuenow', idx + 1);
+      bar.setAttribute('aria-valuetext', `Stage ${idx + 1} of ${TABS.length}: ${TABS[idx][1]}`);
+    }
+    strip.querySelectorAll('button').forEach((b) => {
+      const on = b.dataset.tab === tab;
+      b.setAttribute('aria-selected', on);
+      b.tabIndex = on ? 0 : -1;
+    });
+    requestAnimationFrame(() => placeInk(strip, true));
+  }
+  function placeInk(strip, slide) {
+    const b = strip.querySelector(`[data-tab="${tab}"]`), ink = strip.querySelector('.tab-ink');
+    if (!b || !ink) return;
+    ink.style.transform = `translateX(${b.offsetLeft}px)`;
+    ink.style.width = `${b.offsetWidth}px`;
+    const target = Math.max(0, b.offsetLeft - (strip.clientWidth - b.offsetWidth) / 2);
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    strip.scrollTo({ left: target, behavior: slide && !reduce ? 'smooth' : 'auto' });
+    edgeFades(strip);
+  }
+  function edgeFades(strip) {
+    strip.parentElement.classList.toggle('more-l', strip.scrollLeft > 2);
+    strip.parentElement.classList.toggle('more-r', strip.scrollLeft + strip.clientWidth < strip.scrollWidth - 2);
+  }
+  /* "Up next" at the bottom of every stage walks through them in order */
+  function upNext(body) {
+    const i = TABS.findIndex(([id]) => id === tab);
+    if (i < 0 || i >= TABS.length - 1) return;
+    const [id, label] = TABS[i + 1];
+    const n = document.createElement('div');
+    n.className = 'up-next';
+    n.innerHTML = `<span class="lab-mono">Up next</span><button class="btn" type="button"><b>${String(i + 2).padStart(2, '0')}</b> ${label} <span aria-hidden="true">→</span></button>`;
+    n.querySelector('button').addEventListener('click', () => goTab(id));
+    body.appendChild(n);
   }
 
   function renderTab() {
@@ -155,6 +229,7 @@
     const scroll = body.scrollTop;
     body.innerHTML = '';
     ({ mine: (b) => RB.appmode.tabMine(b), colours: tabColours, walls: tabWalls, look: tabLook, anim: tabAnim, panels: tabPanels, extras: tabExtras, ideas: tabIdeas }[tab])(body);
+    upNext(body);
     body.scrollTop = scroll;
   }
 
@@ -596,7 +671,7 @@
     const d = DISTROS[S.distro];
     $('#outFor').textContent = `for ${d.long}`;
     const file = `${G.slug(S.name)}-${S.distro}.sh`;
-    $('#runHint').textContent = `bash ${file}`;
+    { const rh = $('#runHint'); if (rh) rh.textContent = `bash ${file}`; }
     const body = $('#outBody');
     if (outMode === 'script') {
       body.innerHTML = `<pre class="code full">${hl(G.buildScript(S, S.distro))}</pre>`;
@@ -780,7 +855,7 @@
   RB.app = {
     get state() { return S; },
     loadState, toast, refresh: () => { refresh(); renderTab(); }, renderHeader,
-    setTab: (t) => { tab = t; renderTabs(); renderTab(); },
+    setTab: (t) => goTab(t),
     wallSrc, wallOrig, clone,
     setDistro: (d) => { S.distro = d; renderHeader(); refresh(); renderTab(); },
   };
