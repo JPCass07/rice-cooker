@@ -125,11 +125,16 @@ select, input[type=text], input[type=url], input[type=number] {
 .stage { grid-area: stage; min-width: 0; }
 .output { grid-area: output; min-width: 0; border-top: 1px solid var(--line); padding-top: 28px; margin-top: 12px; }
 
-.tabs { display: flex; overflow-x: auto; border-bottom: 1px solid var(--line); scrollbar-width: none; flex-shrink: 0; }
-.tabs button { flex: 1 0 auto; border: 0; background: none; cursor: pointer; padding: 13px 12px 11px; font: 500 11px var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--ink-2); border-bottom: 2px solid transparent; }
-.tabs button b { font-weight: 500; margin-right: 5px; opacity: .55; }
-.tabs button:hover { color: var(--ink); }
-.tabs button[aria-selected=true] { color: var(--ink); border-bottom-color: var(--accent); }
+.tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-bottom: 1px solid var(--line); flex-shrink: 0; }
+.tabs button { border: 0; border-bottom: 1px solid var(--line); background: none; cursor: pointer; padding: 10px 4px 9px; display: flex; flex-direction: column; align-items: center; gap: 2px;
+  font: 500 10.5px var(--mono); text-transform: uppercase; letter-spacing: .06em; color: var(--ink-2); position: relative; min-width: 0; }
+.tabs button:not(:nth-child(4n)) { border-right: 1px solid var(--line); }
+.tabs button:nth-last-child(-n+4):nth-child(4n+1), .tabs button:nth-last-child(-n+4):nth-child(4n+1) ~ button { border-bottom: 0; }
+.tabs button b { font-weight: 500; opacity: .55; font-size: 9.5px; }
+.tabs button span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.tabs button:hover { color: var(--ink); background: color-mix(in srgb, var(--ink) 4%, transparent); }
+.tabs button[aria-selected=true] { color: var(--ink); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.tabs button[aria-selected=true]::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--accent); }
 .tab-body { overflow-y: auto; padding: 20px 18px 30px; }
 
 .group { margin-bottom: 26px; }

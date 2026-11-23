@@ -146,7 +146,7 @@
   ];
   function renderTabs() {
     $('#tabs').innerHTML = TABS.map(([id, label], i) =>
-      `<button role="tab" data-tab="${id}" aria-selected="${id === tab}"><b>${String(i + 1).padStart(2, '0')}</b>${label}</button>`).join('');
+      `<button role="tab" data-tab="${id}" aria-selected="${id === tab}"><b>${String(i + 1).padStart(2, '0')}</b><span>${label}</span></button>`).join('');
     $('#tabs').querySelectorAll('button').forEach((b) => b.addEventListener('click', () => { tab = b.dataset.tab; renderTabs(); renderTab(); }));
   }
 
