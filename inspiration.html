@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inspiration · Rice Cooker</title>
+<meta name="description" content="Hyprland ricing competition winners, desktop shells and KDE projects that Rice Cooker presets borrow from.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%230A0A0A%22/%3E%3Cpath d=%22M7 15h18v7a4 4 0 0 1-4 4H11a4 4 0 0 1-4-4z%22 fill=%22none%22 stroke=%22%23E9E9E9%22 stroke-width=%221.6%22/%3E%3Cpath d=%22M6 15h20M12 11c0-2 2-3 4-3s4 1 4 3%22 fill=%22none%22 stroke=%22%23E9E9E9%22 stroke-width=%221.6%22 stroke-linecap=%22round%22/%3E%3Ccircle cx=%2222%22 cy=%2220%22 r=%221.5%22 fill=%22%23E6D675%22/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Geist:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans:wght@400;500&display=swap" rel="stylesheet">
+<script>try { const t = localStorage.getItem('rc.theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body class="page">
+<header class="nav">
+  <div class="wrap nav-row">
+    <a class="brand" href="index.html" aria-label="Rice Cooker home">
+      <svg class="brand-icon" viewBox="0 0 32 32" aria-hidden="true"><path d="M7 15h18v7a4 4 0 0 1-4 4H11a4 4 0 0 1-4-4z"/><path d="M6 15h20M12 11c0-2 2-3 4-3s4 1 4 3"/><circle class="dot" cx="22" cy="20" r="1.5"/></svg>
+      <span>Rice Cooker</span>
+    </a>
+    <nav class="links" aria-label="Pages">
+      <a href="index.html">Build</a>
+      <a href="inspiration.html" aria-current="page">Inspiration</a>
+      <a href="download.html">Download</a>
+      <a href="https://github.com/JPCass07/rice-cooker">GitHub</a>
+    </nav>
+    <button class="theme-btn" id="themeBtn" type="button" aria-label="Switch light or dark theme"><span class="sun"></span></button>
+  </div>
+</header>
+<main class="wrap sub-page">
+  <section class="sub-hero">
+    <p class="kicker">Keynote</p>
+    <h1>Inspiration.<br><span>Rices worth borrowing from.</span></h1>
+    <p class="lede">Every Hyprland ricing competition winner, the shells people are switching to, and the projects the presets borrow colours and layouts from. Open one in the builder, or follow the link to its dotfiles.</p>
+  </section>
+  <section class="insp-section">
+    <h2>Competition winners <span class="sub">from the Hyprland hall of fame</span></h2>
+    <div class="win-grid" id="winners"></div>
+  </section>
+  <section class="insp-section">
+    <h2>Shells <span class="sub">what the showcase runs now</span></h2>
+    <div class="ideas cols" id="shells"></div>
+  </section>
+  <section class="insp-section">
+    <h2>Everything else <span class="sub">themes, effects, tools and techniques</span></h2>
+    <div class="seg small" id="ideaFilter" role="group" aria-label="Filter by kind"></div>
+    <div class="ideas cols" id="allIdeas"></div>
+  </section>
+</main>
+<footer class="foot wrap">
+  <div class="foot-row">
+    <span>Rice Cooker. Open source, MIT. Colours and scripts are made in your browser; nothing is uploaded.</span>
+    <span>Presets credit the rices they are based on: Serpantinum by ilyamiro, Caelestia by soramane, and the Hyprland ricing competition winners in the <a href="https://hypr.land/hall_of_fame">hall of fame</a>.</span>
+  </div>
+</footer>
+<script src="js/ideas.js"></script>
+<script src="js/site.js"></script>
+</body>
+</html>

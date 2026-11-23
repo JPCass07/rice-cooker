@@ -893,6 +893,7 @@
   function refresh() {
     refreshLight();
     $('#riceName').textContent = S.name;
+    document.title = `${S.name} · Rice Cooker`;
     $('#riceSub').textContent = `${S.palette.name}, ${DISTROS[S.distro].name}`;
     const cr = $('#credit');
     if (S.credit) {

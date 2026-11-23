@@ -6,7 +6,7 @@ Build a KDE Plasma 6 rice, preview it live, save it as a preset, and apply it on
 
 | | |
 | --- | --- |
-| **Use it in your browser** | <https://jpcass07.github.io/rice-cooker/>: build a rice and download the script for your distro. Nothing to install. |
+| **Use it in your browser** | <https://jpcass07.github.io/rice-cooker/>: build a rice and download the script for your distro. Nothing to install. Also: [Inspiration](https://jpcass07.github.io/rice-cooker/inspiration.html) and [Download](https://jpcass07.github.io/rice-cooker/download.html) pages. |
 | **Download the desktop app** | [rice-cooker.flatpak](https://github.com/JPCass07/rice-cooker/releases/latest/download/rice-cooker.flatpak) ([all releases](https://github.com/JPCass07/rice-cooker/releases)): applies rices straight to your desktop, keeps your saved rices, and opens `.rice` files people send you. |
 
 Install the app (needs Flatpak and Flathub; the GNOME runtime comes from Flathub automatically):
@@ -104,7 +104,8 @@ bash my-rice-debian.sh -y     # no question
 
 | Path | What |
 | --- | --- |
-| `index.html`, `css/` | the page |
+| `index.html`, `css/` | the builder page |
+| `inspiration.html`, `download.html`, `js/site.js` | the Inspiration and Download pages |
 | `js/palette.js` | colour maths, wallpaper extraction, scheme suggestions, `.colors`/Konsole/kitty writers |
 | `js/catalog.js` | distros, features, package names, option lists |
 | `js/generate.js` | preset → shell steps and script |
