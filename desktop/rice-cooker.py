@@ -281,13 +281,23 @@ class Window(Adw.ApplicationWindow):
         self.web = WebKit.WebView(user_content_manager=ucm)
         s = self.web.get_settings()
         s.set_enable_developer_extras(os.environ.get("RC_DEVTOOLS") == "1")
+        s.set_enable_write_console_messages_to_stdout(os.environ.get("RC_DEBUG") == "1")
         s.set_javascript_can_access_clipboard(True)
         self.web.connect("decide-policy", self.on_policy)
         self.web.connect("create", lambda *_: None)  # never open new web windows
 
         root = web_root()
         self.web.load_uri((root / "index.html").as_uri() + "?app=1")
+        self.web.set_vexpand(True)
+
+        # KDE draws the title bar (server-side, in your window decoration theme);
+        # keep the window title in step with the rice on screen
+        self.web.connect("notify::title", self.on_title)
         self.set_content(self.web)
+
+    def on_title(self, web, _pspec):
+        t = web.get_title() or ""
+        self.set_title(t if t.endswith("Rice Cooker") else "Rice Cooker")
 
     # page -> python
     def on_message(self, _ucm, value):
@@ -320,7 +330,10 @@ class Window(Adw.ApplicationWindow):
 
 class App(Adw.Application):
     def __init__(self):
-        super().__init__(application_id=APP_ID, flags=Gio.ApplicationFlags.HANDLES_OPEN)
+        flags = Gio.ApplicationFlags.HANDLES_OPEN
+        if os.environ.get("RC_TEST") == "1":  # let a test copy run beside an open window
+            flags |= Gio.ApplicationFlags.NON_UNIQUE
+        super().__init__(application_id=APP_ID, flags=flags)
 
     def do_activate(self):
         win = self.get_active_window() or Window(self)

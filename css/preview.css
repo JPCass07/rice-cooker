@@ -106,6 +106,42 @@
 .wc.cal .days i { font-style: normal; color: var(--p-dim); }
 .wc.cal .days i.on { background: var(--p-accent); color: var(--p-on-accent); border-radius: 50%; }
 
+/* SDDM login screens: Breeze, and the Rice Cooker theme (blur, clean, dock) */
+.login { position: absolute; inset: 0; z-index: 20; overflow: hidden; color: #fff; font-family: var(--ui-font), sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2cqi; }
+.lg-bg { position: absolute; inset: -2cqi; background-size: cover; background-position: center; background-color: var(--p-bg); transition: filter .45s, transform .45s; }
+.login.st-blur .lg-bg, .login.st-dock.open .lg-bg, .login.st-breeze.blur .lg-bg { filter: blur(1.4cqi) brightness(.75); }
+.login.st-dock .lg-bg { filter: blur(.5cqi) brightness(.85); }
+.login.st-plain .lg-bg { background: linear-gradient(160deg, #1d99f3, #13293d); }
+.login > *:not(.lg-bg) { position: relative; }
+.lg-clock { font: 300 7cqi/1 var(--ui-font), sans-serif; text-align: center; text-shadow: 0 .3cqi 1.4cqi rgba(0,0,0,.35); }
+.lg-clock small, .lg-corner small { display: block; font-size: 1.5cqi; margin-top: .8cqi; opacity: .85; }
+.lg-card { display: flex; flex-direction: column; align-items: center; gap: .8cqi; padding: 2cqi 2.2cqi; border-radius: 1.6cqi; background: color-mix(in srgb, var(--p-surface) 82%, transparent); border: 1px solid color-mix(in srgb, var(--p-fg) 12%, transparent); color: var(--p-fg); transition: opacity .3s, transform .4s cubic-bezier(.2,.8,.2,1); }
+.login.st-breeze .lg-card, .login.st-plain .lg-card { background: none; border: 0; color: #fff; }
+.lg-card small { font-size: 1cqi; color: var(--p-dim); }
+.lg-power { font-size: 1cqi; color: var(--p-dim); }
+.lg-avatar { width: 6.4cqi; height: 6.4cqi; border-radius: 50%; background: linear-gradient(135deg, var(--p-accent), color-mix(in srgb, var(--p-accent) 50%, #000)); }
+.login.st-plain .lg-avatar { background: #3daee9; }
+.lg-card b { font-weight: 500; font-size: 1.5cqi; }
+.lg-row { display: flex; gap: .6cqi; align-items: center; }
+.lg-field { width: 20cqi; padding: .8cqi 1.1cqi; border-radius: .9cqi; background: color-mix(in srgb, var(--p-fg) 9%, transparent); border: 1.5px solid var(--p-accent); font-size: 1.15cqi; display: flex; justify-content: space-between; align-items: center; opacity: .9; }
+.lg-field i { width: 1px; height: 1.4cqi; background: var(--p-accent); animation: blink 1.1s steps(1) infinite; }
+.lg-go { width: 3.2cqi; height: 3.2cqi; border-radius: 50%; display: grid; place-items: center; background: var(--p-accent); color: var(--p-on-accent); font-size: 1.4cqi; }
+.login.st-plain .lg-go, .login.st-plain .lg-field { border-color: #3daee9; } .login.st-plain .lg-go { background: #3daee9; color: #fff; }
+/* clean: wallpaper only, card fades in */
+.lg-corner { position: absolute !important; left: 3cqi; bottom: 3cqi; font: 300 5cqi/1 var(--ui-font), sans-serif; text-shadow: 0 .3cqi 1.4cqi rgba(0,0,0,.4); transition: opacity .3s; }
+.login.st-clean .lg-card { opacity: 0; transform: scale(.96); }
+.login.st-clean.open .lg-card { opacity: 1; transform: none; }
+.login.st-clean.open .lg-corner { opacity: 0; }
+/* dock: pill at the bottom, card pops up above it */
+.login.st-dock { justify-content: flex-end; padding-bottom: 3cqi; gap: 1.6cqi; }
+.login.st-dock .lg-card { opacity: 0; transform: translateY(4cqi); }
+.login.st-dock.open .lg-card { opacity: 1; transform: none; }
+.lg-pill { display: flex; align-items: center; gap: 1.2cqi; padding: 1cqi 1.8cqi; border-radius: 99px; background: color-mix(in srgb, var(--p-surface) 86%, transparent); border: 1px solid color-mix(in srgb, var(--p-fg) 14%, transparent); color: var(--p-fg); font-size: 1.1cqi; transition: border-color .3s; }
+.login.st-dock.open .lg-pill { border-color: var(--p-accent); }
+.lg-pill b { font-weight: 600; font-size: 1.4cqi; } .lg-pill span { color: var(--p-dim); }
+.lg-pill i { width: 1px; height: 1.6cqi; background: color-mix(in srgb, var(--p-fg) 25%, transparent); }
+.lg-pill i.lg-av { width: 2.2cqi; height: 2.2cqi; border-radius: 50%; background: var(--p-accent); }
+
 /* windows */
 .win {
   position: absolute; border-radius: var(--rad); overflow: hidden; z-index: 3;

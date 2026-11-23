@@ -449,6 +449,144 @@ JS_EOF
         '"$Q" org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript "$RB_CLOCK_JS"',
       ], 'Adds a large Digital Clock widget to the desktop of the primary screen. Move or resize it in Edit Mode.');
     }
+    /* login screen (SDDM) */
+    if (has('cookerLogin') && s.login && s.login.mode === 'cooker') {
+      const L = s.login, T = RB.sddmTheme;
+      const wall = active && L.wallpaper !== false ? fileName(active) : null;
+      const userConf = ['[General]', `style=${L.style || 'blur'}`, `accent=${p.accent}`, `bg=${p.bg}`, `surface=${p.surface}`, `fg=${p.fg}`, `dim=${p.fgDim}`,
+        `font=${s.fonts.ui !== 'keep' ? s.fonts.ui : 'Noto Sans'}`, `clock24=${L.clock24 !== false}`,
+        `background=${wall ? `/usr/share/wallpapers/rice-cooker/login-${wall}` : ''}`];
+      const conf = ['[Theme]', 'Current=rice-cooker'];
+      if (s.cursor !== 'keep') conf.push(`CursorTheme=${s.cursor}`);
+      const c = [
+        'TD=/usr/share/sddm/themes/rice-cooker',
+        'DM=$(basename "$(readlink -f /etc/systemd/system/display-manager.service 2>/dev/null)" .service)',
+        'if [ "$DM" != "sddm" ]; then',
+        '  echo "Login screen: this computer uses ${DM:-an unknown display manager}, not SDDM, so it was left alone."',
+        'else',
+        '  sudo install -d "$TD"',
+        `  sudo tee "$TD/metadata.desktop" >/dev/null <<'META_EOF'
+${T.metadata.trim()}
+META_EOF`,
+        `  sudo tee "$TD/theme.conf" >/dev/null <<'CONF_EOF'
+${T.themeConf.trim()}
+CONF_EOF`,
+        `  sudo tee "$TD/Main.qml" >/dev/null <<'QML_EOF'
+${T.mainQml.trim()}
+QML_EOF`,
+      ];
+      if (wall) c.push(
+        `  WALL="${WALLDIR}/${wall}"`,
+        '  if [ -f "$WALL" ]; then sudo install -d /usr/share/wallpapers/rice-cooker && sudo install -m644 "$WALL" "/usr/share/wallpapers/rice-cooker/login-$(basename "$WALL")"; fi',
+      );
+      c.push(
+        `  printf '%s\n' ${userConf.map(sq).join(' ')} | sudo tee "$TD/theme.conf.user" >/dev/null`,
+        '  sudo install -d /etc/sddm.conf.d',
+        `  printf '%s\n' ${conf.map(sq).join(' ')} | sudo tee /etc/sddm.conf.d/zz-rice-cooker.conf >/dev/null`,
+        '  if [ -n "${BACKUP:-}" ] && [ -f "$BACKUP/undo.sh" ]; then',
+        `    printf '%s\n' '# login screen' 'sudo rm -f /etc/sddm.conf.d/zz-rice-cooker.conf' 'echo "Login screen restored."' >> "$BACKUP/undo.sh"`,
+        '  fi',
+        '  echo "Login screen set. Try it now with: sddm-greeter-qt6 --test-mode --theme $TD"',
+        'fi',
+      );
+      step('login', `Login screen: Rice Cooker ${L.style || 'blur'} style`, c, FEATURES.cookerLogin.note);
+    }
+
+    if (has('sddm') && s.login && (s.login.mode === 'rice' || s.login.mode === 'breeze')) {
+      const L = s.login, rice = L.mode === 'rice';
+      const wall = active && rice && L.wallpaper ? fileName(active) : null;
+      const theme = ['[General]', `showClock=${L.clock !== false}`];
+      if (rice) {
+        theme.push(`color=${p.accent}`);
+        theme.push(wall ? 'type=image' : 'type=color');
+        if (wall) theme.push(`background=/usr/share/wallpapers/rice-cooker/login-${wall}`);
+      }
+      const conf = ['[Theme]', 'Current=breeze'];
+      if (rice && s.cursor !== 'keep') conf.push(`CursorTheme=${s.cursor}`);
+      if (rice && s.fonts.ui !== 'keep') conf.push(`Font=${fontStr(s.fonts.ui, s.fonts.size)}`);
+      const c = [
+        'THEME_DIR=/usr/share/sddm/themes/breeze',
+        'DM=$(basename "$(readlink -f /etc/systemd/system/display-manager.service 2>/dev/null)" .service)',
+        'if [ "$DM" != "sddm" ]; then',
+        '  echo "Login screen: this computer uses ${DM:-an unknown display manager}, not SDDM, so it was left alone."',
+        'elif [ ! -d "$THEME_DIR" ]; then',
+        '  echo "Login screen: the Breeze SDDM theme is not installed ($THEME_DIR), so it was left alone."',
+        'else',
+        '  # keep the first original so undo can put it back',
+        '  [ -f "$THEME_DIR/theme.conf.user" ] && [ ! -f "$THEME_DIR/theme.conf.user.rice-cooker-orig" ] && sudo cp -a "$THEME_DIR/theme.conf.user" "$THEME_DIR/theme.conf.user.rice-cooker-orig"',
+      ];
+      if (L.mode === 'breeze') {
+        c.push('  sudo rm -f "$THEME_DIR/theme.conf.user" /etc/sddm.conf.d/zz-rice-cooker.conf');
+      } else {
+        if (wall) c.push(
+          `  WALL="${WALLDIR}/${wall}"`,
+          '  LOGIN_WALL="/usr/share/wallpapers/rice-cooker/login-$(basename "$WALL")"',
+          '  if [ -f "$WALL" ]; then',
+          '    sudo install -d /usr/share/wallpapers/rice-cooker',
+          ...(L.blur ? [
+            '    IM=$(command -v magick || command -v convert)',
+            '    if [ -n "$IM" ]; then tmpw=$(mktemp --suffix=.png); "$IM" "$WALL" -resize "2560x2560>" -blur 0x28 "$tmpw" && sudo install -m644 "$tmpw" "$LOGIN_WALL"; rm -f "$tmpw"',
+            '    else echo "ImageMagick not found: using the sharp wallpaper on the login screen"; sudo install -m644 "$WALL" "$LOGIN_WALL"; fi',
+          ] : ['    sudo install -m644 "$WALL" "$LOGIN_WALL"']),
+          '  fi',
+        );
+        c.push(
+          `  printf '%s\n' ${theme.map(sq).join(' ')} | sudo tee "$THEME_DIR/theme.conf.user" >/dev/null`,
+          '  sudo install -d /etc/sddm.conf.d',
+          `  printf '%s\n' ${conf.map(sq).join(' ')} | sudo tee /etc/sddm.conf.d/zz-rice-cooker.conf >/dev/null`,
+        );
+        if (L.sync !== false) c.push(
+          '  # what System Settings > Login Screen > "Apply Plasma Settings" does: colours, fonts and icons for the greeter',
+          '  SDDM_HOME=$(getent passwd sddm | cut -d: -f6)',
+          '  if [ -n "$SDDM_HOME" ] && [ -f "$HOME/.config/kdeglobals" ]; then',
+          '    sudo install -d -o sddm -g sddm "$SDDM_HOME/.config"',
+          '    sudo install -o sddm -g sddm -m644 "$HOME/.config/kdeglobals" "$SDDM_HOME/.config/kdeglobals"',
+          '  fi',
+        );
+      }
+      c.push(
+        '  if [ -n "${BACKUP:-}" ] && [ -f "$BACKUP/undo.sh" ]; then',
+        `    cat >> "$BACKUP/undo.sh" <<'LOGIN_EOF'`,
+        '# login screen',
+        'sudo rm -f /etc/sddm.conf.d/zz-rice-cooker.conf',
+        'if [ -f /usr/share/sddm/themes/breeze/theme.conf.user.rice-cooker-orig ]; then sudo cp -a /usr/share/sddm/themes/breeze/theme.conf.user.rice-cooker-orig /usr/share/sddm/themes/breeze/theme.conf.user; else sudo rm -f /usr/share/sddm/themes/breeze/theme.conf.user; fi',
+        'echo "Login screen restored."',
+        'LOGIN_EOF',
+        '  fi',
+        '  echo "Login screen set. You will see it the next time you log out or restart."',
+        'fi',
+      );
+      step('login', L.mode === 'breeze' ? 'Login screen: plain Breeze' : 'Login screen to match', c, FEATURES.sddm.note);
+    }
+
+    /* widget library: add the chosen widgets where they sit in the preview */
+    const lib = (s.extras.widgets || []).map((id) => RB.catalog.WIDGETS.find((w) => w.id === id)).filter(Boolean)
+      .filter((w) => w.id !== 'weather' || has('addonWidgets'));
+    if (lib.length) {
+      const pos = s.extras.widgetPos || {};
+      const list = lib.map((w, i) => `  [${JSON.stringify(w.plasmoid)}, ${(pos[w.id] || [3 + (i % 4) * 12, 8 + Math.floor(i / 4) * 16]).join(', ')}, ${w.size.join(', ')}]`).join(',\n');
+      step('widgetlib', `Desktop widgets (${lib.length})`, [
+        `RB_LIB_JS=$(cat <<'JS_EOF'
+var g = screenGeometry(0);
+// [widget, x %, y %, width, height] - positions come from the Rice Cooker preview
+var lib = [
+${list}
+];
+var ds = desktops();
+for (var i = 0; i < ds.length; i++) {
+  if (ds[i].screen !== 0) continue;
+  for (var k = 0; k < lib.length; k++) {
+    if (knownWidgetTypes.indexOf(lib[k][0]) < 0) { print("skipping " + lib[k][0] + ": not installed"); continue; }
+    ds[i].addWidget(lib[k][0], Math.round(g.width * lib[k][1] / 100), Math.round(g.height * lib[k][2] / 100), lib[k][3], lib[k][4]);
+  }
+}
+JS_EOF
+)`,
+        Q,
+        '"$Q" org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript "$RB_LIB_JS"',
+      ], 'Puts each widget where you placed it in the preview. To move or resize them later: right-click the desktop > Enter Edit Mode, then drag.');
+    }
+
     if (has('widgetColumn')) {
       step('widgets', 'Widget column on the desktop', [
         `RB_WIDGETS_JS=$(cat <<'JS_EOF'

@@ -131,6 +131,24 @@
     },
     shakeCursor: { label: 'Shake cursor to find it', builtin: true, minPlasma: '6.2' },
     bigClock: { label: 'Big clock on the desktop', builtin: true },
+    cookerLogin: {
+      label: 'Rice Cooker login theme (SDDM, Qt 6)',
+      pkgs: { debian: ['qml6-module-qtquick-effects', 'qml6-module-qtquick-controls'], ubuntu: ['qml6-module-qtquick-effects', 'qml6-module-qtquick-controls'], fedora: 'qt6-qtdeclarative', arch: 'qt6-declarative', opensuse: 'qt6-declarative-imports' },
+      note: 'Installs a login theme to /usr/share/sddm/themes/rice-cooker, so it asks for your password and applies to every account. Try it without logging out: sddm-greeter-qt6 --test-mode --theme /usr/share/sddm/themes/rice-cooker',
+    },
+    imagemagick: {
+      label: 'ImageMagick (blurs the login background)',
+      pkgs: { debian: 'imagemagick', ubuntu: 'imagemagick', fedora: 'ImageMagick', arch: 'imagemagick', opensuse: 'ImageMagick' },
+    },
+    addonWidgets: {
+      label: 'Weather widget (Plasma add-ons)',
+      pkgs: { debian: 'plasma-widgets-addons', ubuntu: 'plasma-widgets-addons', fedora: 'kdeplasma-addons', arch: 'kdeplasma-addons', opensuse: 'kdeplasma6-addons' },
+    },
+    sddm: {
+      label: 'Login screen (SDDM, Breeze theme)',
+      pkgs: { debian: 'sddm-theme-breeze', ubuntu: 'sddm-theme-breeze', fedora: 'sddm-breeze', arch: 'plasma-desktop', opensuse: 'plasma6-workspace' },
+      note: 'Changes system files, so it asks for your password, and applies to every account on this computer.',
+    },
     widgetColumn: {
       label: 'Widget column on the desktop (weather, now playing, CPU, memory, calendar)',
       pkgs: { debian: 'plasma-widgets-addons', ubuntu: 'plasma-widgets-addons', fedora: 'kdeplasma-addons', arch: 'kdeplasma-addons', opensuse: 'kdeplasma6-addons' },
@@ -273,6 +291,17 @@
       { id: 'unity', label: 'Side launcher + top bar', hint: 'Unity-like' },
       { id: 'minimal', label: 'Thin top bar only', hint: 'tiling-WM look' },
     ],
+    loginStyle: [
+      { id: 'blur', label: 'Blur: blurred wallpaper, clock and login card' },
+      { id: 'clean', label: 'Clean: just the wallpaper; the card appears when you type' },
+      { id: 'dock', label: 'Dock: Caelestia-style pill that pops up the login card' },
+    ],
+    loginMode: [
+      { id: 'keep', label: 'Leave my login screen alone' },
+      { id: 'cooker', label: 'Rice Cooker login (blur, clean or dock style)', feature: 'cookerLogin' },
+      { id: 'rice', label: 'Breeze, matched to this rice', feature: 'sddm' },
+      { id: 'breeze', label: 'Reset to plain Breeze', feature: 'sddm' },
+    ],
     cycleInterval: [
       { id: 'off', label: 'Only when I run it' },
       { id: '15min', label: 'Every 15 minutes' }, { id: '30min', label: 'Every 30 minutes' },
@@ -299,10 +328,29 @@
     if (s.extras.panelColorizer) add('panelColorizer', 'Panel Colorizer');
     if (s.extras.termExtras) add('termExtras', 'Terminal extras');
     if (s.extras.bigClock) add('bigClock', 'Desktop clock');
+    if ((s.extras.widgets || []).includes('weather')) add('addonWidgets', 'Weather widget');
+    if (s.login && (s.login.mode === 'rice' || s.login.mode === 'breeze')) add('sddm', 'Login screen');
+    if (s.login && s.login.mode === 'cooker') add('cookerLogin', 'Login screen');
+    if (s.login && s.login.mode === 'rice' && s.login.blur && s.login.wallpaper !== false) add('imagemagick', 'Blurred login background');
     if (s.extras.widgetColumn) add('widgetColumn', 'Widget column');
     if (s.extras.serpKde) add('serpKde', 'Serpantinum-KDE');
     return need;
   }
 
-  RB.catalog = { DISTROS, DESKTOPS, FEATURES, OPTIONS, compat, cmpVer, requiredFeatures };
+  /* Desktop widget library. Plasma widget IDs checked on Plasma 6.3 (Debian 13). */
+  const WIDGETS = [
+    { id: 'digitalclock', name: 'Digital clock', plasmoid: 'org.kde.plasma.digitalclock', size: [300, 150] },
+    { id: 'analogclock', name: 'Analog clock', plasmoid: 'org.kde.plasma.analogclock', size: [200, 200] },
+    { id: 'weather', name: 'Weather', plasmoid: 'org.kde.plasma.weather', size: [300, 160] },
+    { id: 'mediacontroller', name: 'Now playing', plasmoid: 'org.kde.plasma.mediacontroller', size: [320, 180] },
+    { id: 'cpu', name: 'CPU usage', plasmoid: 'org.kde.plasma.systemmonitor.cpu', size: [220, 160] },
+    { id: 'memory', name: 'Memory usage', plasmoid: 'org.kde.plasma.systemmonitor.memory', size: [220, 160] },
+    { id: 'net', name: 'Network speed', plasmoid: 'org.kde.plasma.systemmonitor.net', size: [260, 160] },
+    { id: 'disk', name: 'Disk usage', plasmoid: 'org.kde.plasma.systemmonitor.diskusage', size: [220, 160] },
+    { id: 'calendar', name: 'Calendar', plasmoid: 'org.kde.plasma.calendar', size: [300, 280] },
+    { id: 'notes', name: 'Sticky note', plasmoid: 'org.kde.plasma.notes', size: [240, 220] },
+    { id: 'puzzle', name: '15 puzzle', plasmoid: 'org.kde.plasma.fifteenpuzzle', size: [240, 240] },
+  ];
+
+  RB.catalog = { WIDGETS, DISTROS, DESKTOPS, FEATURES, OPTIONS, compat, cmpVer, requiredFeatures };
 })((window.RB = window.RB || {}));

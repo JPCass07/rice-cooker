@@ -131,6 +131,7 @@
       if (!bc) { bc = el('div', 'bigclock'); space.prepend(bc); }
       bc.innerHTML = '14:32<small>Sunday 23 November</small>';
     } else if (bc) bc.remove();
+    renderLibrary(s);
     let wc = desk.querySelector('.wcol');
     if (s.extras.widgetColumn) {
       if (!wc) { wc = el('div', 'wcol'); space.appendChild(wc); }
@@ -142,8 +143,10 @@
     } else { if (wc) wc.remove(); term.style.left = ''; }
   }
 
+  let currentWall = null;
   function setWall(src, instant) {
     if (!desk) return;
+    currentWall = src || null;
     const css = src ? `url("${src}")` : 'linear-gradient(135deg, var(--p-bg2), var(--p-accent2))';
     if (instant || wl[wallIdx].style.backgroundImage === css) { wl[wallIdx].style.backgroundImage = css; return; }
     const next = 1 - wallIdx;
@@ -326,18 +329,65 @@
     hideBadge();
   }
 
+  /* ---------- widget library: chosen desktop widgets, draggable like Plasma's Edit Mode ---------- */
+  const WLOOK = {
+    digitalclock: '<b class="wl-big">14:32</b><span>Sunday</span>', analogclock: '<i class="wl-analog"></i>',
+    weather: '<b>9°C</b><span>Cloudy</span>', mediacontroller: '<i class="art"></i><span>Everlong</span>',
+    cpu: '<i class="wl-ring" style="--v:63"></i><span>CPU</span>', memory: '<i class="wl-ring" style="--v:41"></i><span>RAM</span>',
+    net: '<span class="eq">' + '<i></i>'.repeat(8) + '</span><span>Network</span>', disk: '<i class="wl-ring" style="--v:74"></i><span>Disk</span>',
+    calendar: '<b>November</b><span>23</span>', notes: '<span>Notes</span><b>cook rice</b>', puzzle: '<b>15</b><span>Puzzle</span>',
+  };
+  function renderLibrary(s) {
+    space.querySelectorAll('.wlib').forEach((x) => x.remove());
+    (s.extras.widgets || []).forEach((id, i) => {
+      const w = el('div', 'wlib', WLOOK[id] || id);
+      const pos = (s.extras.widgetPos || {})[id] || [3 + (i % 4) * 12, 8 + Math.floor(i / 4) * 16];
+      w.style.left = pos[0] + '%'; w.style.top = pos[1] + '%';
+      w.title = 'Drag me (in Plasma: right-click the desktop > Enter Edit Mode)';
+      w.addEventListener('pointerdown', (e) => {
+        const r = desk.getBoundingClientRect(), sx = e.clientX, sy = e.clientY, ox = pos[0], oy = pos[1];
+        w.setPointerCapture(e.pointerId);
+        const mv = (ev) => { pos[0] = Math.max(0, Math.min(92, ox + ((ev.clientX - sx) / r.width) * 100)); pos[1] = Math.max(0, Math.min(90, oy + ((ev.clientY - sy) / r.height) * 100)); w.style.left = pos[0] + '%'; w.style.top = pos[1] + '%'; };
+        const up = () => { w.removeEventListener('pointermove', mv); s.extras.widgetPos = Object.assign({}, s.extras.widgetPos, { [id]: pos.map(Math.round) }); };
+        w.addEventListener('pointermove', mv); w.addEventListener('pointerup', up, { once: true });
+      });
+      space.appendChild(w);
+    });
+  }
+
+  /* ---------- SDDM login screen (Breeze) ---------- */
+  async function playLogin() {
+    const L = S.login || {};
+    const cooker = L.mode === 'cooker', style = cooker ? (L.style || 'blur') : (L.mode === 'rice' ? 'breeze' : 'plain');
+    showBadge(cooker ? `Login: Rice Cooker ${style}` : style === 'breeze' ? 'Login: Breeze, matched' : 'Login: plain Breeze');
+    const useWall = (cooker || style === 'breeze') && L.wallpaper !== false && currentWall;
+    const lg = el('div', `login st-${style} ${style === 'breeze' && L.blur ? 'blur' : ''}`);
+    const card = `<div class="lg-card"><i class="lg-avatar"></i><b>you</b><span class="lg-row"><span class="lg-field">Password<i></i></span><span class="lg-go">→</span></span><small>Session: Plasma (Wayland) ▸</small><span class="lg-power">Sleep · Restart · Shut down</span></div>`;
+    lg.innerHTML = `<div class="lg-bg" style="${useWall ? `background-image:url('${currentWall}')` : ''}"></div>` +
+      (style === 'clean' ? '<div class="lg-corner">05:30<small>Sunday 23 November</small></div>' + card
+        : style === 'dock' ? card + '<div class="lg-pill"><b>05:30</b><span>Sunday 23 November</span><i></i><i class="lg-av"></i><b>you</b></div>'
+        : (L.clock !== false || cooker ? '<div class="lg-clock">05:30<small>Sunday 23 November</small></div>' : '') + card);
+    desk.appendChild(lg);
+    await anim(lg, [{ opacity: 0 }, { opacity: 1 }], { duration: dur(300), fill: 'forwards' });
+    if (style === 'clean' || style === 'dock') { await wait(1100); lg.classList.add('open'); }
+    await wait(2600);
+    await anim(lg, [{ opacity: 1 }, { opacity: 0 }], { duration: dur(300), fill: 'forwards' });
+    lg.remove();
+    hideBadge();
+  }
+
   async function play(kind) {
     if (busy || !S) return;
     busy = true;
     try {
-      const run = ({ dash: playDash, open: playOpen, minimize: playMinimize, desktop: playDesktop, switcher: playSwitcher, cube: playCube }[kind] || (async () => {}))();
+      const run = ({ login: playLogin, dash: playDash, open: playOpen, minimize: playMinimize, desktop: playDesktop, switcher: playSwitcher, cube: playCube }[kind] || (async () => {}))();
       // never let a stalled animation (e.g. a background tab) lock the buttons
       await Promise.race([run, wait(9000)]);
     } finally {
       busy = false;
       files.style.visibility = ''; files.style.transformOrigin = '';
       ov.classList.remove('show'); hideBadge();
-      desk.querySelectorAll('.shard, .dash').forEach((x) => x.remove());
+      desk.querySelectorAll('.shard, .dash, .login').forEach((x) => x.remove());
     }
   }
 

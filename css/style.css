@@ -417,3 +417,7 @@ body.page { --accent: #E6D675; --on-accent: #0A0A0A; }
 .sha { word-break: break-all; }
 .facts .ub-facts { grid-template-columns: repeat(3, 1fr); }
 @media (max-width: 900px) { .steps-grid, .facts .ub-facts { grid-template-columns: 1fr; } }
+
+.wlib-pick { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { border: 1px solid var(--line-2); background: none; border-radius: 99px; padding: 5px 11px; font-size: 13px; cursor: pointer; color: var(--ink-2); }
+.chip[aria-pressed=true] { background: var(--accent); color: var(--on-accent); border-color: transparent; }

@@ -142,7 +142,7 @@
   const TABS = [
     ...(RB.isApp ? [['mine', 'My rices']] : []),
     ['colours', 'Colours'], ['walls', 'Wallpapers'], ['look', 'Look'], ['anim', 'Motion'],
-    ['panels', 'Panels'], ['extras', 'Extras'],
+    ['panels', 'Panels'], ['login', 'Login'], ['extras', 'Extras'],
   ];
   // Inspiration sits outside the stages: a keynote you can open from any stage
   /* The tab strip is one row that slides: the active stage is kept centred, a bar
@@ -239,7 +239,7 @@
     const body = $('#tabBody');
     const scroll = body.scrollTop;
     body.innerHTML = '';
-    ({ mine: (b) => RB.appmode.tabMine(b), colours: tabColours, walls: tabWalls, look: tabLook, anim: tabAnim, panels: tabPanels, extras: tabExtras, ideas: tabIdeas }[tab])(body);
+    ({ mine: (b) => RB.appmode.tabMine(b), colours: tabColours, walls: tabWalls, look: tabLook, anim: tabAnim, panels: tabPanels, login: tabLogin, extras: tabExtras, ideas: tabIdeas }[tab])(body);
     upNext(body);
     body.scrollTop = scroll;
   }
@@ -597,6 +597,34 @@
     body.appendChild(g);
   }
 
+  /* ---------- login screen ---------- */
+  function tabLogin(body) {
+    S.login = S.login || { mode: 'keep', wallpaper: true, sync: true, clock: true };
+    const L = S.login;
+    let g = group('Login screen', 'SDDM, the KDE login manager');
+    g.appendChild(selectRow('Style', 'loginMode', () => L.mode, (v) => { L.mode = v; if (v !== 'keep') setTimeout(() => RB.preview.play('login'), 50); }));
+    if (L.mode === 'cooker') {
+      g.appendChild(selectRow('Style', 'loginStyle', () => L.style || 'blur', (v) => { L.style = v; setTimeout(() => RB.preview.play('login'), 50); }));
+      g.appendChild(toggleRow('Use the active wallpaper', () => L.wallpaper !== false, (v) => { L.wallpaper = v; }, null,
+        S.wallpapers.length ? 'Copied to <code>/usr/share/wallpapers/rice-cooker</code>, because the login screen cannot read your home folder. Blur and Dock blur it live.' : 'Add a wallpaper first; without one the background is the rice\'s base colour.'));
+      g.appendChild(toggleRow('24-hour clock', () => L.clock24 !== false, (v) => { L.clock24 = v; }));
+    }
+    if (L.mode === 'rice') {
+      g.appendChild(toggleRow('Use the active wallpaper as the background', () => L.wallpaper !== false, (v) => { L.wallpaper = v; }, null,
+        S.wallpapers.length ? 'Copied to <code>/usr/share/wallpapers/rice-cooker</code>, because the login screen cannot read your home folder.' : 'Add a wallpaper first; without one the background is a plain colour.'));
+      if (L.wallpaper !== false && S.wallpapers.length) g.appendChild(toggleRow('Blur the background', () => !!L.blur, (v) => { L.blur = v; setTimeout(() => RB.preview.play('login'), 50); }, null, 'A blurred copy is made with ImageMagick when the script runs.'));
+      g.appendChild(toggleRow('Same colours, fonts and icons as the desktop', () => L.sync !== false, (v) => { L.sync = v; }, null,
+        'Does what System Settings > Login Screen > Apply Plasma Settings does.'));
+    }
+    if (L.mode === 'rice' || L.mode === 'breeze') g.appendChild(toggleRow('Show the clock', () => L.clock !== false, (v) => { L.clock = v; }));
+    g.appendChild(playBtn('login', 'Preview the login screen'));
+    const h = document.createElement('p');
+    h.className = 'hint';
+    h.innerHTML = 'Changes system files (<code>/etc/sddm.conf.d</code> and the Breeze theme), so it asks for your password and applies to every account. <code>undo.sh</code> puts the old login screen back. If this computer does not use SDDM, the step is skipped.';
+    g.appendChild(h);
+    body.appendChild(g);
+  }
+
   /* ---------- extras ---------- */
   function tabExtras(body) {
     let g = group('Add-ons', 'third-party projects');
@@ -606,6 +634,29 @@
     g.appendChild(toggleRow(FEATURES.termExtras.label, () => S.extras.termExtras, (v) => { S.extras.termExtras = v; }, 'termExtras'));
     g.appendChild(toggleRow(FEATURES.widgetColumn.label, () => S.extras.widgetColumn, (v) => { S.extras.widgetColumn = v; }, 'widgetColumn', 'The stack of cards down the right side of Caelestia.'));
     g.appendChild(toggleRow(FEATURES.bigClock.label, () => S.extras.bigClock, (v) => { S.extras.bigClock = v; }, 'bigClock', 'The giant clock seen in Hybrid Summer, Golden Era and the Nothing rices.'));
+    body.appendChild(g);
+
+    g = group('Widget library', 'drag them around the preview');
+    const wl = document.createElement('div');
+    wl.className = 'wlib-pick';
+    RB.catalog.WIDGETS.forEach((w) => {
+      const on = (S.extras.widgets || []).includes(w.id);
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'chip'; b.setAttribute('aria-pressed', on);
+      b.textContent = w.name;
+      b.onclick = () => {
+        const set = new Set(S.extras.widgets || []);
+        on ? set.delete(w.id) : set.add(w.id);
+        S.extras.widgets = RB.catalog.WIDGETS.map((x) => x.id).filter((id) => set.has(id));
+        refresh(); renderTab();
+      };
+      wl.appendChild(b);
+    });
+    g.appendChild(wl);
+    const wh = document.createElement('p');
+    wh.className = 'hint';
+    wh.innerHTML = 'Plasma desktop widgets. Drag them on the preview to place them; the script puts them in the same spots. On your desktop, right-click > Enter Edit Mode to move or resize them any time.' + ((S.extras.widgets || []).includes('weather') ? compatNote('addonWidgets') : '');
+    g.appendChild(wh);
     body.appendChild(g);
 
     g = group('Replace the shell', 'advanced');
@@ -870,6 +921,7 @@
     const bar = $('#playBar');
     bar.innerHTML = '';
     bar.append(playBtn('switcher', 'Alt+Tab'), playBtn('open', 'Open'), playBtn('minimize', 'Minimise'), playBtn('desktop', 'Desktops'));
+    if (S.login && S.login.mode !== 'keep') bar.appendChild(playBtn('login', 'Login'));
     if (S.anim.cube) bar.appendChild(playBtn('cube', 'Cube'));
     if (['topdock', 'serpantinum', 'island'].includes(S.panel)) bar.appendChild(playBtn('dash', 'Top dock'));
     if (S.wallpapers.length > 1) {
