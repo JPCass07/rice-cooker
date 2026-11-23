@@ -142,10 +142,12 @@
   const TABS = [
     ...(RB.isApp ? [['mine', 'My rices']] : []),
     ['colours', 'Colours'], ['walls', 'Wallpapers'], ['look', 'Look'], ['anim', 'Motion'],
-    ['panels', 'Panels'], ['extras', 'Extras'], ['ideas', 'Inspiration'],
+    ['panels', 'Panels'], ['extras', 'Extras'],
   ];
+  // Inspiration sits outside the stages: a keynote you can open from any stage
   /* The tab strip is one row that slides: the active stage is kept centred, a bar
      glides to it, and the edges fade while more stages are hidden off to the side. */
+  let lastStage = null;
   function goTab(t) {
     const changed = t !== tab;
     tab = t;
@@ -174,18 +176,26 @@
       });
       window.addEventListener('resize', () => { placeInk(strip, false); edgeFades(strip); });
       // where you are: "Stage 4 of 8 · Look" and a bar with one segment per stage
-      let meter = strip.parentElement.querySelector('.stage-meter');
-      if (!meter) { meter = document.createElement('div'); meter.className = 'stage-meter'; strip.parentElement.appendChild(meter); }
-      meter.innerHTML = `<div class="sm-text"><span class="sm-now"></span><span class="sm-left"></span></div>
+      const wrap = strip.closest('.tabs-wrap');
+      let meter = wrap.querySelector('.stage-meter');
+      if (!meter) { meter = document.createElement('div'); meter.className = 'stage-meter'; wrap.appendChild(meter); }
+      meter.innerHTML = `<div class="sm-text"><span class="sm-now"></span></div>
         <div class="sm-bar" role="progressbar" aria-valuemin="1" aria-valuemax="${TABS.length}">${TABS.map(([id, label]) => `<button type="button" data-tab="${id}" title="${label}" aria-label="Go to ${label}"></button>`).join('')}</div>`;
       meter.querySelectorAll('.sm-bar button').forEach((b) => b.addEventListener('click', () => goTab(b.dataset.tab)));
+      const kn = $('#keynoteBtn');
+      if (kn) kn.addEventListener('click', () => goTab(tab === 'ideas' ? (lastStage || TABS[0][0]) : 'ideas'));
     }
+    if (tab !== 'ideas') lastStage = tab;
+    const kn = $('#keynoteBtn');
+    if (kn) kn.setAttribute('aria-pressed', tab === 'ideas');
     const idx = TABS.findIndex(([id]) => id === tab);
-    const meter = strip.parentElement.querySelector('.stage-meter');
+    const meter = strip.closest('.tabs-wrap').querySelector('.stage-meter');
+    if (meter && idx < 0) {
+      meter.querySelector('.sm-now').innerHTML = `Keynote <b>Inspiration</b>`;
+      meter.querySelectorAll('.sm-bar button').forEach((b) => b.classList.remove('on'));
+    }
     if (meter && idx >= 0) {
-      const left = TABS.length - 1 - idx;
       meter.querySelector('.sm-now').innerHTML = `Stage ${idx + 1} of ${TABS.length} <b>${TABS[idx][1]}</b>`;
-      meter.querySelector('.sm-left').textContent = left ? `${left} stage${left > 1 ? 's' : ''} left` : 'Last stage';
       meter.querySelectorAll('.sm-bar button').forEach((b, i) => { b.classList.toggle('done', i < idx); b.classList.toggle('on', i === idx); });
       const bar = meter.querySelector('.sm-bar');
       bar.setAttribute('aria-valuenow', idx + 1);
@@ -200,7 +210,8 @@
   }
   function placeInk(strip, slide) {
     const b = strip.querySelector(`[data-tab="${tab}"]`), ink = strip.querySelector('.tab-ink');
-    if (!b || !ink) return;
+    if (ink) ink.style.opacity = b ? 1 : 0;
+    if (!b || !ink) { edgeFades(strip); return; }
     ink.style.transform = `translateX(${b.offsetLeft}px)`;
     ink.style.width = `${b.offsetWidth}px`;
     const target = Math.max(0, b.offsetLeft - (strip.clientWidth - b.offsetWidth) / 2);

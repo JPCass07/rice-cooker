@@ -136,10 +136,20 @@ select, input[type=text], input[type=url], input[type=number] {
 .tabs button[aria-selected=true] b { opacity: 1; color: var(--accent); }
 .tab-ink { position: absolute; left: 0; bottom: 0; height: 2px; width: 0; background: var(--accent); border-radius: 2px; transition: transform .45s var(--ease), width .45s var(--ease); pointer-events: none; }
 /* fades say "there's more this way" and sit over the strip edges */
-.tabs-wrap::before, .tabs-wrap::after { content: ''; position: absolute; top: 0; height: 41px; width: 44px; pointer-events: none; opacity: 0; transition: opacity .25s; z-index: 1; }
-.tabs-wrap::before { left: 0; background: linear-gradient(90deg, var(--surface), transparent); }
-.tabs-wrap::after { right: 0; background: linear-gradient(270deg, var(--surface), transparent); }
-.tabs-wrap.more-l::before, .tabs-wrap.more-r::after { opacity: 1; }
+.tabs-row { display: flex; align-items: stretch; }
+.strip-box { position: relative; flex: 1; min-width: 0; }
+.strip-box::before, .strip-box::after { content: ''; position: absolute; top: 0; bottom: 0; width: 44px; pointer-events: none; opacity: 0; transition: opacity .25s; z-index: 1; }
+.strip-box::before { left: 0; background: linear-gradient(90deg, var(--surface), transparent); }
+.strip-box::after { right: 0; background: linear-gradient(270deg, var(--surface), transparent); }
+.strip-box.more-l::before, .strip-box.more-r::after { opacity: 1; }
+/* Inspiration: a keynote pinned beside the stages, not one of them */
+.keynote { flex: none; display: flex; align-items: center; gap: 7px; border: 0; border-left: 1px solid var(--line); background: none; cursor: pointer; padding: 0 14px;
+  font: italic 400 17px var(--serif); color: var(--ink-2); transition: color .2s, background .2s; }
+.keynote::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); opacity: .7; }
+.keynote:hover { color: var(--ink); }
+.keynote[aria-pressed=true] { color: var(--ink); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.keynote[aria-pressed=true]::before { opacity: 1; }
+.tab-ink { transition: transform .45s var(--ease), width .45s var(--ease), opacity .2s; }
 .stage-meter { padding: 10px 16px 12px; border-top: 1px solid var(--line); }
 .sm-text { display: flex; justify-content: space-between; gap: 10px; font: 500 10.5px var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--ink-2); margin-bottom: 8px; }
 .sm-text b { color: var(--ink); font-weight: 500; margin-left: 6px; }
