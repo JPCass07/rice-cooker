@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rice Cooker</title>
+<meta name="description" content="Build a KDE Plasma rice, preview it, save presets, and get the shell commands for Debian, Kubuntu, Fedora, Arch or openSUSE.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%228%22 fill=%22%23d0bcff%22/%3E%3Cpath d=%22M8 18h16l-2 7H10z%22 fill=%22%23141218%22/%3E%3Cpath d=%22M11 15c0-3 2-5 5-5s5 2 5 5%22 stroke=%22%23141218%22 stroke-width=%222.5%22 fill=%22none%22/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans:wght@400;500&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/preview.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <span class="brand-mark" aria-hidden="true"></span>
+    <span class="brand-name">rice<i>/</i>cooker</span>
+  </div>
+
+  <label class="top-field">
+    <span>Desktop</span>
+    <select id="desktopSel" aria-label="Desktop environment"></select>
+  </label>
+
+  <div class="top-field">
+    <span>Distro</span>
+    <div class="seg" id="distroSeg" role="radiogroup" aria-label="Target distro"></div>
+  </div>
+
+  <div class="top-field preset-field">
+    <span>Preset</span>
+    <div class="preset-bar">
+      <select id="presetSel" aria-label="Load a preset"></select>
+      <button class="btn" id="btnSave" title="Save the current setup as a preset in this browser">Save</button>
+      <button class="btn" id="btnExport" title="Download this preset as a .json file">Export</button>
+      <label class="btn" title="Load a preset .json file">Import<input type="file" id="importFile" accept=".json,application/json" hidden></label>
+      <button class="btn" id="btnShare" title="Copy a link that opens this preset">Share link</button>
+      <button class="btn ghost" id="btnDelete" title="Delete this saved preset">Delete</button>
+    </div>
+  </div>
+</header>
+
+<main class="layout">
+  <aside class="controls">
+    <nav class="tabs" id="tabs" role="tablist"></nav>
+    <div class="tab-body" id="tabBody"></div>
+  </aside>
+
+  <section class="stage">
+    <div class="stage-head">
+      <h2><span id="riceName">My rice</span> <small id="riceSub"></small></h2>
+      <div class="play" id="playBar"></div>
+    </div>
+    <div class="desk-frame">
+      <div class="desk" id="desk"></div>
+    </div>
+    <div class="compat" id="compat"></div>
+  </section>
+
+  <section class="output" id="output">
+    <div class="out-head">
+      <h2>Commands <small id="outFor"></small></h2>
+      <div class="seg small" id="outMode" role="radiogroup" aria-label="Output format">
+        <button data-mode="steps" aria-pressed="true">Steps</button>
+        <button data-mode="script" aria-pressed="false">Full script</button>
+      </div>
+      <div class="out-actions">
+        <button class="btn primary" id="btnDownload">Download .sh</button>
+        <button class="btn" id="btnCopyAll">Copy script</button>
+      </div>
+    </div>
+    <p class="out-help">Save the script, then run <code id="runHint">bash rice.sh</code> as your normal user. It backs up your KDE settings first and writes an <code>undo.sh</code> next to the backup.</p>
+    <div id="outBody"></div>
+  </section>
+</main>
+
+<footer class="foot">
+  Rice Cooker is open source. Colours and settings are generated in your browser; nothing is uploaded.
+  <a href="https://github.com/JPCass07/rice-cooker" id="repoLink">Source on GitHub</a>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="js/palette.js"></script>
+<script src="js/catalog.js"></script>
+<script src="js/presets.js"></script>
+<script src="js/generate.js"></script>
+<script src="js/ideas.js"></script>
+<script src="js/preview.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
