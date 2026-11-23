@@ -55,6 +55,14 @@
         P({ location: 'top', height: 30, lengthMode: 'fill', floating: false, widgets: ['menu', 'gmenu', 'spacer', 'clock', 'spacer', 'tray'] }),
         P({ location: 'bottom', height: 54, lengthMode: 'fit', alignment: 'center', floating: true, hiding: 'dodgewindows', widgets: ['tasks'] }),
       ],
+      serpantinum: [
+        P({ location: 'top', height: 26, lengthMode: 'fill', floating: false, widgets: ['pager', 'spacer', 'clock', 'spacer', 'tray'] }),
+        P({ location: 'bottom', height: 44, lengthMode: 'fit', alignment: 'center', floating: true, hiding: 'dodgewindows', widgets: ['tasks'] }),
+      ],
+      island: [
+        P({ location: 'top', height: 30, lengthMode: 'fit', alignment: 'center', floating: true, widgets: ['menu', 'pager', 'clock', 'tray'] }),
+        P({ location: 'bottom', height: 50, lengthMode: 'fit', alignment: 'center', floating: true, hiding: 'dodgewindows', widgets: ['tasks'] }),
+      ],
       leftbar: [P({ location: 'left', height: 46, lengthMode: 'fill', floating: true, widgets: ['menu', 'pager', 'tasks', 'spacer', 'tray', 'clock'] })],
       dock: [P({ location: 'bottom', height: 54, lengthMode: 'fit', alignment: 'center', floating: true, widgets: ['menu', 'tasks', 'sep', 'tray', 'clock'] })],
       win11: [P({ location: 'bottom', height: 46, lengthMode: 'fill', floating: false, widgets: ['spacer', 'menu', 'tasks', 'spacer', 'tray', 'clock', 'desk'] })],
@@ -410,6 +418,32 @@ Parent=FALLBACK/`),
     }
     if (has('betterBlur')) {
       step('betterblur', 'Better Blur DX', ['echo "Better Blur DX was installed from the AUR: enable it in System Settings > Desktop Effects (turn off the stock Blur)."']);
+    }
+
+    if (has('bigClock')) {
+      step('bigclock', 'Big clock on the desktop', [
+        `RB_CLOCK_JS=$(cat <<'JS_EOF'
+var ds = desktops();
+for (var i = 0; i < ds.length; i++) {
+  if (ds[i].screen !== 0) continue;
+  var w = ds[i].addWidget("org.kde.plasma.digitalclock", Math.round(screenGeometry(0).width / 2) - 260, 140, 520, 220);
+  w.currentConfigGroup = ["Appearance"];
+  w.writeConfig("showDate", true);
+  w.writeConfig("dateDisplayFormat", "BelowTime");
+  w.writeConfig("autoFontAndSize", true);
+}
+JS_EOF
+)`,
+        Q,
+        '"$Q" org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript "$RB_CLOCK_JS"',
+      ], 'Adds a large Digital Clock widget to the desktop of the primary screen. Move or resize it in Edit Mode.');
+    }
+    if (has('serpKde')) {
+      step('serpkde', 'Serpantinum-KDE shell', [
+        'mkdir -p "$HOME/.local/src"',
+        '[ -d "$HOME/.local/src/serpantinum-kde" ] || git clone --depth 1 https://github.com/mj0x0/serpantinum-kde "$HOME/.local/src/serpantinum-kde"',
+        'cd "$HOME/.local/src/serpantinum-kde" && ./install.sh',
+      ], FEATURES.serpKde.note + ' Its installer asks before it changes anything.');
     }
 
     /* rice cycle */

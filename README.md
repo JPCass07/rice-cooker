@@ -4,18 +4,31 @@ Build a KDE Plasma 6 rice in your browser, preview it live, save it as a preset,
 
 **Use it:** <https://jpcass07.github.io/rice-cooker/> or open `index.html` from a download (no build step, no server needed).
 
+## Presets
+
+- **Your favourites:** Serpantinum (KDE), after [ilyamiro's Serpantinum](https://github.com/ilyamiro/serpantinum), and Caelestia (KDE), after [Caelestia Shell](https://github.com/caelestia-dots/shell).
+- **Hyprland ricing competition winners** ([hall of fame](https://hypr.land/hall_of_fame)): Astroland (#1, Moon 2026), Celestial (#1, Space 2023), Hybrid Summer (#1, Summer 2023), Golden Era (#3, Space 2023), Day and Night (#3, Summer 2023), Aurora (#2, Winter 2022), Duskhide (#3, Fantasy 2025).
+- **Showcase favourites** from the Hyprland Discord: Nothing, NieR Parchment.
+- **Classics:** Kinetic Teal, Catppuccin, Nord, Gruvbox, Tokyo Night, Rosé Pine, Paper Light.
+
+Each preset credits the rice it is based on. Only colours and layout ideas are borrowed: the palettes were sampled from the winners' screenshots, and the wallpapers are drawn in the browser.
+
 ## What it does
 
 - **Colour schemes.** Pick a classic (Catppuccin, Nord, Gruvbox, Tokyo Night, Rosé Pine, Everforest, Caelestia Dusk and more) or edit every colour. One palette becomes a Plasma `.colors` scheme, the accent colour, a Konsole scheme and profile, and a kitty theme.
 - **Wallpaper → colours.** Drop in wallpapers and Rice Cooker reads their colours (k-means in the browser) and suggests matching schemes: Night, Neon, Daylight, Muted, and the closest classic.
 - **Rice cycling.** Give each wallpaper its own scheme and install `rice-cycle`, which swaps the wallpaper, Plasma colours, accent, Konsole and kitty together. Run it by hand, from the "Next Rice" app-menu entry or a shortcut, or on a systemd timer.
 - **Motion.** Alt+Tab layouts (Cover Switch, Flip Switch, Thumbnail Grid, Big Icons, Compact, Sidebar), window open/close (Glide, Scale, Fade, Fall Apart), minimise (Magic Lamp, Squash), desktop switching (Slide, Fade, Desktop Cube), wobbly windows, blur and speed. Every one previews in the mock desktop.
-- **Panels.** Floating left bar (Caelestia-like), top bar + dock, dock only, centred taskbar, classic, Unity-style, thin top bar. Built with Plasma's own desktop scripting.
+- **Panels.** Thin bar with centred clock + mini dock (Serpantinum-like), floating island + dock, floating left bar (Caelestia-like), top bar + dock, dock only, centred taskbar, classic, Unity-style, thin top bar. Built with Plasma's own desktop scripting.
 - **Look.** Plasma style, Breeze or Kvantum, Papirus (with folders recoloured to the accent), Tela, Bibata cursors, fonts, title-bar buttons.
-- **Extras.** KDE-Rounded-Corners, Panel Colorizer, Better Blur DX, fastfetch, btop and cava.
+- **Extras.** KDE-Rounded-Corners, Panel Colorizer, Better Blur DX, a big desktop clock, fastfetch, btop and cava, and the [serpantinum-kde](https://github.com/mj0x0/serpantinum-kde) Quickshell shell (Arch only: Quickshell isn't packaged elsewhere).
 - **Cross-distro presets.** Presets are distro-neutral JSON. Switch distro and the commands change (package names, AUR, downloads, builds). Anything that can't work there is marked *"This customisation can't be used on …"* and left out of the script.
 - **Presets.** Save in the browser, export and import `.rice.json`, or share a link.
-- **Inspiration.** 70 linked rices, themes, effects and tools from the research in [`research/REFERENCES.md`](research/REFERENCES.md).
+- **Inspiration.** 93 linked rices, competition winners, themes, effects and tools from the research in [`research/REFERENCES.md`](research/REFERENCES.md).
+
+## Design
+
+Shares its design language with my [portfolio](https://jpcass07.github.io/Portfolio/) and Flytrap: near-black ground (warm eggshell in light mode), Instrument Serif headlines with a grey second line, Geist text, JetBrains Mono labels, hairline rules and one accent, which here follows the rice you are building.
 
 ## The generated script
 
@@ -33,7 +46,7 @@ bash my-rice-debian.sh -y     # no question
 
 - Package names checked on 2026-11-23 against each distro's repos (Docker images `debian:trixie`, `ubuntu:26.04`, `fedora:43`, `archlinux`, `opensuse/tumbleweed`) and the AUR.
 - Plasma versions then: Debian 13 6.3, Kubuntu 26.04 6.6, Fedora 43 6.7, Arch and Tumbleweed 6.8.
-- All built-in presets × 5 distros pass `bash -n`. The Debian script was run end to end in a Debian 13 container with KDE commands stubbed, checking every file it writes and the `rice-cycle` tool.
+- All 18 built-in presets × 5 distros pass `bash -n`. The Debian script was run end to end in a Debian 13 container with KDE commands stubbed, checking every file it writes and the `rice-cycle` tool.
 - Not yet run on a live desktop for every distro. Reports welcome.
 
 ## Adding a distro or desktop

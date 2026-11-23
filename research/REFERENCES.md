@@ -405,3 +405,30 @@ dbus-send --session --type=method_call --dest=org.kde.KWin /KWin org.kde.KWin.re
 - The Plasma 6.5+ day/night switching config keys weren't found.
 - Licences marked (unverified) weren't read from LICENSE files.
 - Rosé Pine KDE: no repo found.
+
+---
+
+## Hyprland Discord and hall of fame (added 2026-11-23)
+
+Read from the Hyprland Cathedral Discord (#hyprland-showcase forum, server search) and https://hypr.land/hall_of_fame. Only colours and layout ideas were taken; no art or code.
+
+### Ricing competition winners
+
+| # | Theme (date) | 1st | 2nd | 3rd |
+| --- | --- | --- | --- | --- |
+| 5 | Moon (June 2026) | [Astroland](https://codeberg.org/zacoons/astroland_dots), zacoons | [Moon Rice](https://github.com/FlafyDev/hyprland_moon_rice_public), Flafy | [SPACE](https://github.com/ilyamiro/hypr-comp), ilyamiro |
+| 4 | Fantasy (May 2025) | [Rivendell](https://codeberg.org/zacoons/rivendell-hyprdots), zacoons | [Disnay type shi](https://github.com/vdawg-git/fantasy-rice), VDawg | [Duskhide](https://github.com/flafydev/fantasy_rice), Flafy |
+| 3 | Space (Nov 2023) | [Celestial](https://github.com/flafydev/nixos-config/), Flafy | [Globes](https://github.com/Aylur/dotfiles/tree/ags-pre-ts), Aylur | [Golden Era](https://github.com/vdawg-git/space_dots), VDawg |
+| 2 | Summer (May 2023) | [Hybrid Summer](https://github.com/end-4/dots-hyprland/tree/archive/hybrid-summer), end_4 | [Unnamed](https://github.com/FlafyDev/flutter_background_bar), Flafy | [Day and Night](https://github.com/MathisP75/summer-day-and-night), Mathisbuilder |
+| 1 | Winter (Dec 2022) | [Unnamed](https://github.com/FlafyDev/flutter_workspaces_2), Flafy | [Aurora](https://github.com/flick0/dotfiles/tree/aurora), flick0 / [Hyprland Winter](https://github.com/AmadeusWM/hyprland-winter), amadeus | lauroro, Lyasm |
+
+Judged on theme (0–10), creativity, effort and discretionary points; competition 5 also gave bonus points for creative Lua use.
+
+### What the showcase is doing right now
+
+- **Quickshell shells dominate.** Serpantinum (ilyamiro), Caelestia, Noctalia, DankMaterialShell, end-4's ii. Most new rices start from one of these. Serpantinum has a Plasma 6 port ([serpantinum-kde](https://github.com/mj0x0/serpantinum-kde)); Quickshell is only packaged on Arch.
+- **Wallpaper-driven colour** (matugen / Material You) is expected. Rice Cooker's extractor now also suggests a Material-style tonal scheme.
+- **Big clocks, dynamic islands and notches**: added as a desktop clock extra and an island panel layout.
+- **Game and film themes** (NieR, Sekiro, No Man's Sky, Cowboy Bebop, Nothing OS) get the most reactions.
+- **Moderators tag standout posts "Based Rice"**; none were active on 2026-11-23, so the hall of fame was used for winners.
+- Plugin ideas worth porting to KWin later: per-corner rounding (hypr-seam), shader cursor trails (Hyprtail), extended window animations.

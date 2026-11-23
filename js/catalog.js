@@ -125,6 +125,13 @@
       pkgs: { debian: { manual: true }, ubuntu: { manual: true }, fedora: { manual: true }, arch: { aur: 'plasma6-applets-panel-colorizer', manual: true }, opensuse: { manual: true } },
     },
     shakeCursor: { label: 'Shake cursor to find it', builtin: true, minPlasma: '6.2' },
+    bigClock: { label: 'Big clock on the desktop', builtin: true },
+    serpKde: {
+      label: 'Serpantinum-KDE shell (Quickshell bar, dock, launcher, panels)',
+      pkgs: { debian: null, ubuntu: null, fedora: null, arch: ['quickshell', 'git'], opensuse: null },
+      why: "Quickshell 0.3.1+ isn't in the official repos (checked 2026-11-23); build it from quickshell.org first, then run the shell's install.sh",
+      note: 'Runs on top of Plasma 6 Wayland and replaces the Plasma panels while it runs. Made by mj0x0, based on ilyamiro\'s Serpantinum (AGPL-3.0).',
+    },
   };
 
   /** Compatibility of one feature on one distro. */
@@ -247,6 +254,8 @@
     panel: [
       { id: 'keep', label: 'Leave my panels alone' },
       { id: 'leftbar', label: 'Floating left bar', hint: 'Caelestia-like' },
+      { id: 'serpantinum', label: 'Thin bar, centred clock + mini dock', hint: 'Serpantinum-like' },
+      { id: 'island', label: 'Floating island + dock', hint: 'dynamic-island look' },
       { id: 'topbar-dock', label: 'Top bar + floating dock', hint: 'macOS-like' },
       { id: 'dock', label: 'Floating dock only', hint: 'clean' },
       { id: 'win11', label: 'Centred taskbar', hint: 'Windows 11-like' },
@@ -279,6 +288,8 @@
     if (s.extras.betterBlur) add('betterBlur', 'Better Blur');
     if (s.extras.panelColorizer) add('panelColorizer', 'Panel Colorizer');
     if (s.extras.termExtras) add('termExtras', 'Terminal extras');
+    if (s.extras.bigClock) add('bigClock', 'Desktop clock');
+    if (s.extras.serpKde) add('serpKde', 'Serpantinum-KDE');
     return need;
   }
 

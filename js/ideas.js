@@ -1,6 +1,205 @@
 /* Generated from research/ideas.json */
 window.RB_IDEAS = [
  {
+  "name": "Astroland by zacoons",
+  "category": "winner",
+  "url": "https://codeberg.org/zacoons/astroland_dots",
+  "plasma6": "unknown",
+  "winner": "#1 Moon 2026",
+  "notes": "Brass and steel on black, terminals floating around a moon. Rice Cooker preset: Astroland.",
+  "license": "see repo"
+ },
+ {
+  "name": "Moon Rice by Flafy",
+  "category": "winner",
+  "url": "https://github.com/FlafyDev/hyprland_moon_rice_public",
+  "plasma6": "unknown",
+  "winner": "#2 Moon 2026",
+  "notes": "A moon with a ring of day numbers as a calendar dial, media timeline along the bottom.",
+  "license": "see repo"
+ },
+ {
+  "name": "SPACE by ilyamiro",
+  "category": "winner",
+  "url": "https://github.com/ilyamiro/hypr-comp",
+  "plasma6": "unknown",
+  "winner": "#3 Moon 2026",
+  "notes": "Earth from orbit with app icons orbiting a planet and a pill search launcher. Same author as Serpantinum.",
+  "license": "see repo"
+ },
+ {
+  "name": "Rivendell by zacoons",
+  "category": "winner",
+  "url": "https://codeberg.org/zacoons/rivendell-hyprdots",
+  "plasma6": "unknown",
+  "winner": "#1 Fantasy 2025",
+  "notes": "Pixel-art castle, giant clock, parchment terminal.",
+  "license": "see repo"
+ },
+ {
+  "name": "Disnay type shi by VDawg",
+  "category": "winner",
+  "url": "https://github.com/vdawg-git/fantasy-rice",
+  "plasma6": "unknown",
+  "winner": "#2 Fantasy 2025",
+  "notes": "Gothic black and blood red, ornamental centre piece.",
+  "license": "see repo"
+ },
+ {
+  "name": "Duskhide by Flafy",
+  "category": "winner",
+  "url": "https://github.com/flafydev/fantasy_rice",
+  "plasma6": "unknown",
+  "winner": "#3 Fantasy 2025",
+  "notes": "Night forest blues with copper, gold-framed windows. Rice Cooker preset: Duskhide.",
+  "license": "see repo"
+ },
+ {
+  "name": "Celestial by Flafy",
+  "category": "winner",
+  "url": "https://github.com/flafydev/nixos-config/",
+  "plasma6": "unknown",
+  "winner": "#1 Space 2023",
+  "notes": "Navy and cyan HUD, ringed planet, circular volume meter. Rice Cooker preset: Celestial.",
+  "license": "see repo"
+ },
+ {
+  "name": "Globes by Aylur",
+  "category": "winner",
+  "url": "https://github.com/Aylur/dotfiles/tree/ags-pre-ts",
+  "plasma6": "unknown",
+  "winner": "#2 Space 2023",
+  "notes": "AGS shell: dark panels, purple accents, Saturn wallpaper, quick settings.",
+  "license": "see repo"
+ },
+ {
+  "name": "Golden Era by VDawg",
+  "category": "winner",
+  "url": "https://github.com/vdawg-git/space_dots",
+  "plasma6": "unknown",
+  "winner": "#3 Space 2023",
+  "notes": "Cowboy Bebop orange CRT glow on black. Rice Cooker preset: Golden Era.",
+  "license": "see repo"
+ },
+ {
+  "name": "Hybrid Summer by end_4",
+  "category": "winner",
+  "url": "https://github.com/end-4/dots-hyprland/tree/archive/hybrid-summer",
+  "plasma6": "unknown",
+  "winner": "#1 Summer 2023",
+  "notes": "Amber monochrome system dashboards and a big clock. Rice Cooker preset: Hybrid Summer.",
+  "license": "see repo"
+ },
+ {
+  "name": "Unnamed by Flafy",
+  "category": "winner",
+  "url": "https://github.com/FlafyDev/flutter_background_bar",
+  "plasma6": "unknown",
+  "winner": "#2 Summer 2023",
+  "notes": "Olive green code-everywhere look with a Flutter bar.",
+  "license": "see repo"
+ },
+ {
+  "name": "Day and Night by Mathisbuilder",
+  "category": "winner",
+  "url": "https://github.com/MathisP75/summer-day-and-night",
+  "plasma6": "unknown",
+  "winner": "#3 Summer 2023",
+  "notes": "Cream day and dark night themes. Rice Cooker preset: Day and Night, cycled by rice-cycle.",
+  "license": "see repo"
+ },
+ {
+  "name": "Winter by Flafy",
+  "category": "winner",
+  "url": "https://github.com/FlafyDev/flutter_workspaces_2",
+  "plasma6": "unknown",
+  "winner": "#1 Winter 2022",
+  "notes": "Snowflake clock face with roman numerals, frosted blue.",
+  "license": "see repo"
+ },
+ {
+  "name": "Aurora by flick0",
+  "category": "winner",
+  "url": "https://github.com/flick0/dotfiles/tree/aurora",
+  "plasma6": "unknown",
+  "winner": "#2 Winter 2022",
+  "notes": "Pastel lavender gradient, floating audio bars. Rice Cooker preset: Aurora.",
+  "license": "see repo"
+ },
+ {
+  "name": "Hyprland Winter by amadeus",
+  "category": "winner",
+  "url": "https://github.com/AmadeusWM/hyprland-winter",
+  "plasma6": "unknown",
+  "winner": "#2 Winter 2022",
+  "notes": "Night blue, Obsidian graph view, music widget.",
+  "license": "see repo"
+ },
+ {
+  "name": "Serpantinum by ilyamiro",
+  "category": "shell",
+  "url": "https://github.com/ilyamiro/serpantinum",
+  "plasma6": "unknown",
+  "notes": "Quickshell shell for Hyprland, Niri, Sway. The most mentioned shell in the Hyprland Discord this autumn. Rice Cooker preset: Serpantinum (KDE).",
+  "license": "see repo"
+ },
+ {
+  "name": "serpantinum-KDE by mj0x0",
+  "category": "shell",
+  "url": "https://github.com/mj0x0/serpantinum-kde",
+  "plasma6": "unknown",
+  "notes": "Serpantinum rebuilt as a Quickshell shell for Plasma 6 Wayland: bar, dock, launcher, 94 live theme previews, Plasma wallpaper plugin with shader transitions.",
+  "license": "see repo"
+ },
+ {
+  "name": "Caelestia Shell",
+  "category": "shell",
+  "url": "https://github.com/caelestia-dots/shell",
+  "plasma6": "unknown",
+  "notes": "Quickshell shell with Material You colours. Rice Cooker preset: Caelestia (KDE).",
+  "license": "see repo"
+ },
+ {
+  "name": "Noctalia Shell",
+  "category": "shell",
+  "url": "https://github.com/noctalia-dev/noctalia-shell",
+  "plasma6": "unknown",
+  "notes": "Quickshell shell; many first rices in #hyprland-showcase use Noctalia v5.",
+  "license": "see repo"
+ },
+ {
+  "name": "Anserin (Serpantinum fork)",
+  "category": "shell",
+  "url": "https://github.com/lukpednoi/Anserin",
+  "plasma6": "unknown",
+  "notes": "A Hyprland desktop shell forked from Serpantinum.",
+  "license": "see repo"
+ },
+ {
+  "name": "hypr-seam",
+  "category": "showcase",
+  "url": "",
+  "plasma6": "unknown",
+  "notes": "Showcase plugin: per-corner rounding with flat corners where tiled windows meet. Idea for a future KWin rounded-corners mode.",
+  "license": "see repo"
+ },
+ {
+  "name": "Hush: dynamic island on Quickshell",
+  "category": "showcase",
+  "url": "",
+  "plasma6": "unknown",
+  "notes": "Showcase post. Rice Cooker's 'Floating island + dock' panel layout is the KDE take.",
+  "license": "see repo"
+ },
+ {
+  "name": "Nothing OS rices",
+  "category": "showcase",
+  "url": "",
+  "plasma6": "unknown",
+  "notes": "Several highly reacted showcase posts copy Nothing OS: black, dot-matrix, one red dot. Rice Cooker preset: Nothing.",
+  "license": "see repo"
+ },
+ {
   "name": "Umbra (monochrome Plasma 6 rice)",
   "category": "rice",
   "url": "https://github.com/MrGilfy/umbra",

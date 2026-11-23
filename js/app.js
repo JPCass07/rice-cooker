@@ -11,7 +11,7 @@
   let S;                       // current rice
   let tab = 'colours';
   let outMode = 'steps';
-  let presetKey = 'builtin:caelestia';
+  let presetKey = 'builtin:serpantinum';
   const wallSrc = {};          // name -> preview data URL
   const clusters = {};         // name -> extracted colours
   const sugg = {};             // name -> suggested schemes
@@ -37,11 +37,28 @@
 
   /* ---------- theme the page from the palette ---------- */
   function applyTheme(p = S.palette) {
-    const r = document.documentElement.style;
+    // the full palette only themes the preview desktop
+    const d = $('#desk').style;
     const map = { bg: p.bg, bg2: p.bg2, surface: p.surface, fg: p.fg, dim: p.fgDim, accent: p.accent, accent2: p.accent2, red: p.red, green: p.green, yellow: p.yellow, blue: p.blue, magenta: p.magenta, cyan: p.cyan };
-    for (const [k, v] of Object.entries(map)) r.setProperty(`--p-${k}`, v);
-    r.setProperty('--p-on-accent', C.contrast('#ffffff', p.accent) >= C.contrast('#0a0a0a', p.accent) ? '#ffffff' : '#0a0a0a');
-    document.documentElement.classList.toggle('light', !p.dark);
+    for (const [k, v] of Object.entries(map)) d.setProperty(`--p-${k}`, v);
+    const onAcc = (c) => (C.contrast('#ffffff', c) >= C.contrast('#0a0a0a', c) ? '#ffffff' : '#0a0a0a');
+    d.setProperty('--p-on-accent', onAcc(p.accent));
+    // the page chrome borrows only the accent, nudged until it reads on the ground
+    const ground = getComputedStyle(document.documentElement).getPropertyValue('--ground').trim() || '#0A0A0A';
+    const acc = C.ensureContrast(p.accent, ground, 3);
+    document.documentElement.style.setProperty('--accent', acc);
+    document.documentElement.style.setProperty('--on-accent', onAcc(acc));
+  }
+  function wireTheme() {
+    $('#themeBtn').addEventListener('click', () => {
+      const cur = document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+      const next = cur === 'light' ? 'dark' : 'light';
+      document.documentElement.dataset.theme = next;
+      try { localStorage.setItem('rc.theme', next); } catch (e) {}
+      applyTheme();
+    });
+    matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => applyTheme());
+    document.querySelectorAll('[data-tab-link]').forEach((a) => a.addEventListener('click', () => { tab = a.dataset.tabLink; renderTabs(); renderTab(); }));
   }
 
   /* ---------- compatibility ---------- */
@@ -460,6 +477,8 @@
   const MINI = {
     keep: [[6, 82, 88, 12]],
     leftbar: [[2, 5, 8, 90]],
+    serpantinum: [[0, 0, 100, 7], [36, 85, 28, 10]],
+    island: [[34, 5, 32, 10], [30, 83, 40, 12]],
     'topbar-dock': [[0, 0, 100, 11], [33, 82, 34, 12]],
     dock: [[25, 82, 50, 13]],
     win11: [[0, 87, 100, 13]],
@@ -475,7 +494,7 @@
       const b = document.createElement('button');
       b.type = 'button'; b.className = 'lay';
       b.setAttribute('aria-pressed', S.panel === o.id);
-      b.innerHTML = `<div class="mini">${MINI[o.id].map(([l, t, w, h]) => `<i style="left:${l}%;top:${t}%;width:${w}%;height:${h}%;border-radius:${o.id === 'leftbar' ? '6px' : o.id === 'dock' || (o.id === 'topbar-dock' && t > 50) ? '5px' : '1px'}"></i>`).join('')}</div>
+      b.innerHTML = `<div class="mini">${MINI[o.id].map(([l, t, w, h]) => `<i style="left:${l}%;top:${t}%;width:${w}%;height:${h}%;border-radius:${o.id === 'leftbar' || o.id === 'island' || (o.id === 'serpantinum' && t > 50) ? '6px' : o.id === 'dock' || (o.id === 'topbar-dock' && t > 50) ? '5px' : '1px'}"></i>`).join('')}</div>
         <span class="t">${esc(o.label)}</span><span class="h">${esc(o.hint || 'no changes')}</span>`;
       b.addEventListener('click', () => { S.panel = o.id; refresh(); renderTab(); });
       grid.appendChild(b);
@@ -495,6 +514,12 @@
     g.appendChild(toggleRow(FEATURES.panelColorizer.label, () => S.extras.panelColorizer, (v) => { S.extras.panelColorizer = v; }, 'panelColorizer'));
     g.appendChild(toggleRow(FEATURES.betterBlur.label, () => S.extras.betterBlur, (v) => { S.extras.betterBlur = v; }, 'betterBlur'));
     g.appendChild(toggleRow(FEATURES.termExtras.label, () => S.extras.termExtras, (v) => { S.extras.termExtras = v; }, 'termExtras'));
+    g.appendChild(toggleRow(FEATURES.bigClock.label, () => S.extras.bigClock, (v) => { S.extras.bigClock = v; }, 'bigClock', 'The giant clock seen in Hybrid Summer, Golden Era and the Nothing rices.'));
+    body.appendChild(g);
+
+    g = group('Replace the shell', 'advanced');
+    g.appendChild(toggleRow(FEATURES.serpKde.label, () => S.extras.serpKde, (v) => { S.extras.serpKde = v; }, 'serpKde',
+      'A full Quickshell desktop shell that brings the real Serpantinum bar, dock, launcher and panels to Plasma 6 Wayland. <a href="https://github.com/mj0x0/serpantinum-kde" target="_blank" rel="noopener">mj0x0/serpantinum-kde</a>'));
     body.appendChild(g);
 
     g = group('Arch options');
@@ -524,7 +549,7 @@
       const inst = i.install && i.install[S.distro];
       const d = document.createElement('div');
       d.className = 'idea';
-      d.innerHTML = `<a href="${esc(i.url)}" target="_blank" rel="noopener">${esc(i.name)}</a><span class="tag">${esc(i.category)}</span>${i.plasma6 === 'yes' ? '<span class="tag yes">Plasma 6</span>' : i.plasma6 === 'no' ? '<span class="tag">Plasma 5 only</span>' : ''}
+      d.innerHTML = `${i.url ? `<a href="${esc(i.url)}" target="_blank" rel="noopener">${esc(i.name)}</a>` : `<b style="font-weight:500">${esc(i.name)}</b>`}<span class="tag">${esc(i.category)}</span>${i.winner ? `<span class="tag win">${esc(i.winner)}</span>` : ''}${i.plasma6 === 'yes' ? '<span class="tag yes">Plasma 6</span>' : i.plasma6 === 'no' ? '<span class="tag">Plasma 5 only</span>' : ''}
         <p>${esc(i.notes || '')}</p>${inst ? `<p><b>${esc(DISTROS[S.distro].name)}:</b> ${esc(inst)}</p>` : ''}`;
       list.appendChild(d);
     });
@@ -602,7 +627,9 @@
   function saved() { return LS.get('rb.presets') || {}; }
   function renderPresetSel() {
     const sv = saved();
-    $('#presetSel').innerHTML = `<optgroup label="Built-in">${Object.entries(PR.BUILTIN).map(([k, p]) => `<option value="builtin:${k}">${esc(p.name)}</option>`).join('')}</optgroup>` +
+    const groups = {};
+    Object.entries(PR.BUILTIN).forEach(([k, p]) => { (groups[p.group || 'Built-in'] = groups[p.group || 'Built-in'] || []).push([k, p]); });
+    $('#presetSel').innerHTML = Object.entries(groups).map(([g, list]) => `<optgroup label="${esc(g)}">${list.map(([k, p]) => `<option value="builtin:${k}">${esc(p.name)}</option>`).join('')}</optgroup>`).join('') +
       (Object.keys(sv).length ? `<optgroup label="Saved in this browser">${Object.keys(sv).map((k) => `<option value="saved:${esc(k)}">${esc(k)}</option>`).join('')}</optgroup>` : '') +
       (presetKey === 'custom' ? '<option value="custom">(unsaved)</option>' : '');
     $('#presetSel').value = presetKey;
@@ -705,7 +732,12 @@
   function refresh() {
     refreshLight();
     $('#riceName').textContent = S.name;
-    $('#riceSub').textContent = `${S.palette.name} · ${DISTROS[S.distro].name}`;
+    $('#riceSub').textContent = `${S.palette.name}, ${DISTROS[S.distro].name}`;
+    const cr = $('#credit');
+    if (S.credit) {
+      cr.hidden = false;
+      cr.innerHTML = `Inspired by <b>${esc(S.credit.title)}</b> by ${esc(S.credit.by)}${S.credit.url ? ` (<a href="${esc(S.credit.url)}" target="_blank" rel="noopener">source</a>)` : ''}. ${esc(S.credit.note || '')}`;
+    } else cr.hidden = true;
     renderCompat();
     clearTimeout(outT);
     outT = setTimeout(renderOutput, 120);
@@ -717,8 +749,9 @@
   async function init() {
     RB.preview.mount($('#desk'));
     wireHeader();
+    wireTheme();
     renderTabs();
-    let start = null, key = 'builtin:caelestia';
+    let start = null, key = 'builtin:serpantinum';
     const m = /#p=([\w-]+)/.exec(location.hash);
     if (m) {
       try { start = JSON.parse(decodeURIComponent(escape(atob(m[1].replace(/-/g, '+').replace(/_/g, '/'))))); key = 'custom'; }
@@ -728,7 +761,7 @@
       const cur = LS.get('rb.current');
       if (cur && cur.state && cur.state.palette) { start = cur.state; key = cur.key || 'custom'; }
     }
-    if (!start) start = clone(PR.BUILTIN.caelestia);
+    if (!start) start = clone(PR.BUILTIN.serpantinum);
     await loadState(start, key);
   }
   document.addEventListener('DOMContentLoaded', init);

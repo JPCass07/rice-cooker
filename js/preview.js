@@ -87,6 +87,8 @@
     const L = {
       keep: [bar('bottom floating', ['menu', 'pager', 'tasks', 'sp', 'tray', 'clock', 'desk'])],
       'topbar-dock': [bar('top', ['menu', 'gmenu', 'sp', 'clock', 'sp', 'tray']), bar('bottom floating fit dock', ['tasks'])],
+      serpantinum: [bar('top thin serp', ['pager', 'sp', 'clock', 'sp', 'tray']), bar('bottom floating fit dock mini', ['tasks'])],
+      island: [bar('top floating fit island', ['menu', 'pager', 'clock', 'tray']), bar('bottom floating fit dock', ['tasks'])],
       leftbar: [bar('left floatl', ['menu', 'pager', 'tasks', 'sp', 'tray', 'clock'])],
       dock: [bar('bottom floating fit dock', ['menu', 'tasks', 'sep', 'tray', 'clock'])],
       win11: [bar('bottom', ['sp', 'menu', 'tasks', 'sp', 'tray', 'clock', 'desk'])],
@@ -119,6 +121,11 @@
     desk.classList.toggle('icons-flat', !s.icons.startsWith('Papirus') && s.icons !== 'tela');
     renderWindows(s, ctx.distroName, ctx.plasma);
     renderPanels(s.panel);
+    let bc = desk.querySelector('.bigclock');
+    if (s.extras.bigClock) {
+      if (!bc) { bc = el('div', 'bigclock'); space.prepend(bc); }
+      bc.innerHTML = '14:32<small>Sunday 23 November</small>';
+    } else if (bc) bc.remove();
   }
 
   function setWall(src, instant) {

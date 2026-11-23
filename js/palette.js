@@ -100,6 +100,17 @@
     rosepine: P({ name: 'Rosé Pine', bg: '#191724', bg2: '#1f1d2e', surface: '#26233a', fg: '#e0def4', fgDim: '#908caa', accent: '#c4a7e7', accent2: '#ebbcba', red: '#eb6f92', green: '#31748f', yellow: '#f6c177', blue: '#31748f', magenta: '#c4a7e7', cyan: '#9ccfd8' }),
     everforest: P({ name: 'Everforest', bg: '#2d353b', bg2: '#343f44', surface: '#3d484d', fg: '#d3c6aa', fgDim: '#9da9a0', accent: '#a7c080', accent2: '#83c092', red: '#e67e80', green: '#a7c080', yellow: '#dbbc7f', blue: '#7fbbb3', magenta: '#d699b6', cyan: '#83c092' }),
     caelestia: P({ name: 'Caelestia Dusk', bg: '#141218', bg2: '#1d1b20', surface: '#2b2930', fg: '#e6e0e9', fgDim: '#cac4d0', accent: '#d0bcff', accent2: '#efb8c8', red: '#f2b8b5', green: '#b5ccba', yellow: '#e8c38a', blue: '#a8c7fa', magenta: '#ccc2dc', cyan: '#9ecfd4' }),
+    serpantinum: P({ name: 'Serpantinum Butter', bg: '#16150f', bg2: '#1f1e17', surface: '#2c2a22', fg: '#ebe7da', fgDim: '#9d998b', accent: '#e6d675', accent2: '#9fb7c8', red: '#e07a6a', green: '#a9c48f', yellow: '#e6d675', blue: '#8fb2cf', magenta: '#c89fc2', cyan: '#8cc5bd' }),
+    astroland: P({ name: 'Astroland', bg: '#0b0d0d', bg2: '#121616', surface: '#1c2324', fg: '#d9d6c4', fgDim: '#8d8f86', accent: '#c39a5d', accent2: '#6f9bad', red: '#c8705d', green: '#97ad83', yellow: '#d8b673', blue: '#6f9bad', magenta: '#b08aa6', cyan: '#7fb2b0' }),
+    goldenera: P({ name: 'Golden Era', bg: '#0a0603', bg2: '#140c07', surface: '#24160d', fg: '#f9edd9', fgDim: '#b59a7a', accent: '#e0893e', accent2: '#cc985f', red: '#e2593f', green: '#b5b05c', yellow: '#f0c070', blue: '#8fa7b8', magenta: '#d48a78', cyan: '#9fbfae' }),
+    hybridsummer: P({ name: 'Hybrid Summer', bg: '#1e1b17', bg2: '#27231e', surface: '#342f29', fg: '#e8dcb5', fgDim: '#a59a7c', accent: '#d8bf70', accent2: '#9db4a0', red: '#d0805f', green: '#b3b56d', yellow: '#d8bf70', blue: '#8ea8b0', magenta: '#c49a8a', cyan: '#94b8a6' }),
+    celestial: P({ name: 'Celestial', bg: '#050f16', bg2: '#08182a', surface: '#0f2740', fg: '#d6ebf7', fgDim: '#7f9bb0', accent: '#6cb5e0', accent2: '#4f7fd0', red: '#ef7d8a', green: '#7fd1a8', yellow: '#e8d07a', blue: '#4f8fe0', magenta: '#b08ae8', cyan: '#6cd0e0' }),
+    daynight: P({ name: 'Day and Night: Day', dark: false, bg: '#f0ebda', bg2: '#e6dfca', surface: '#fbf8ef', fg: '#2d353b', fgDim: '#5c6a6c', accent: '#3f6f63', accent2: '#8a6a3c', red: '#b5483f', green: '#55783a', yellow: '#946a14', blue: '#3a6d8c', magenta: '#8a5a86', cyan: '#2f7b78' }),
+    daynightNight: P({ name: 'Day and Night: Night', bg: '#232a2e', bg2: '#2d353b', surface: '#374247', fg: '#d3c6aa', fgDim: '#9da9a0', accent: '#83c092', accent2: '#e69875', red: '#e67e80', green: '#a7c080', yellow: '#dbbc7f', blue: '#7fbbb3', magenta: '#d699b6', cyan: '#83c092' }),
+    aurora: P({ name: 'Aurora Pastel', bg: '#191922', bg2: '#20202c', surface: '#2b2b3a', fg: '#e8e0f2', fgDim: '#9b97ad', accent: '#e6a9ec', accent2: '#abaef0', red: '#f2a0b4', green: '#b4e0c0', yellow: '#f2dca8', blue: '#abaef0', magenta: '#e6a9ec', cyan: '#a8dcec' }),
+    nothing: P({ name: 'Nothing', bg: '#000000', bg2: '#0c0c0c', surface: '#1a1a1a', fg: '#f2f2f2', fgDim: '#8a8a8a', accent: '#d71921', accent2: '#e8e8e8', red: '#ff3b3b', green: '#c8c8c8', yellow: '#e8e8e8', blue: '#bdbdbd', magenta: '#ff6b6b', cyan: '#d9d9d9' }),
+    nier: P({ name: 'NieR Parchment', dark: false, bg: '#dad4bb', bg2: '#cdc6aa', surface: '#e6e1cc', fg: '#4e4b42', fgDim: '#7a7563', accent: '#57544a', accent2: '#b35a3c', red: '#a34a3a', green: '#5f6e45', yellow: '#8a7130', blue: '#4f6470', magenta: '#7a5368', cyan: '#4f7066' }),
+    duskhide: P({ name: 'Duskhide', bg: '#11151a', bg2: '#15191d', surface: '#233648', fg: '#e3dcc6', fgDim: '#949172', accent: '#d08a4f', accent2: '#c9b26a', red: '#d0684f', green: '#9aa56a', yellow: '#d9b867', blue: '#6f93b0', magenta: '#b5859a', cyan: '#7fa9a3' }),
     paper: P({ name: 'Paper Light', dark: false, bg: '#f4f1ea', bg2: '#ebe6dc', surface: '#ffffff', fg: '#2b2a27', fgDim: '#6b675f', accent: '#c2553a', accent2: '#2f6fb0', red: '#b3261e', green: '#4f7a28', yellow: '#a06a00', blue: '#2f6fb0', magenta: '#8a4fa3', cyan: '#2a8a8a' }),
   };
 
@@ -206,6 +217,13 @@
       buildScheme({ name: `Daylight ${nm}`, dark: false, baseHue: dom.h, baseSat: dom.s, accent: acc.hex, accent2: acc2.hex }),
       buildScheme({ name: `Muted ${colourName(dom.hex)}`, dark: true, baseHue: dom.h, baseSat: dom.s * 0.6, accent: mix(acc.hex, dom.hex, 0.35), accent2: acc2.hex, mute: 0.55 }),
     ];
+    // Material-style tonal scheme (Caelestia / matugen look): tinted surfaces, pastel primary
+    {
+      const h = acc.h;
+      list.push({ name: `Material ${nm}`, dark: true, bg: hsl(h, 0.14, 0.075), bg2: hsl(h, 0.13, 0.11), surface: hsl(h, 0.12, 0.17),
+        fg: hsl(h, 0.2, 0.9), fgDim: hsl(h, 0.1, 0.72), accent: hsl(h, 0.75, 0.82), accent2: hsl(h + 40, 0.55, 0.8),
+        red: hsl(4, 0.7, 0.8), green: hsl(140, 0.35, 0.76), yellow: hsl(42, 0.65, 0.76), blue: hsl(215, 0.75, 0.82), magenta: hsl(300, 0.3, 0.8), cyan: hsl(185, 0.4, 0.75) });
+    }
     // closest classic scheme by accent hue and darkness
     let best = null, bd = Infinity;
     for (const [id, p] of Object.entries(PALETTES)) {

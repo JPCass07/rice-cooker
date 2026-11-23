@@ -4,45 +4,82 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Rice Cooker</title>
-<meta name="description" content="Build a KDE Plasma rice, preview it, save presets, and get the shell commands for Debian, Kubuntu, Fedora, Arch or openSUSE.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%228%22 fill=%22%23d0bcff%22/%3E%3Cpath d=%22M8 18h16l-2 7H10z%22 fill=%22%23141218%22/%3E%3Cpath d=%22M11 15c0-3 2-5 5-5s5 2 5 5%22 stroke=%22%23141218%22 stroke-width=%222.5%22 fill=%22none%22/%3E%3C/svg%3E">
+<meta name="description" content="Cook a KDE Plasma rice in your browser, preview it, save presets, and get the shell commands for Debian, Kubuntu, Fedora, Arch or openSUSE.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%230A0A0A%22/%3E%3Cpath d=%22M7 15h18v7a4 4 0 0 1-4 4H11a4 4 0 0 1-4-4z%22 fill=%22none%22 stroke=%22%23E9E9E9%22 stroke-width=%221.6%22/%3E%3Cpath d=%22M6 15h20M12 11c0-2 2-3 4-3s4 1 4 3%22 fill=%22none%22 stroke=%22%23E9E9E9%22 stroke-width=%221.6%22 stroke-linecap=%22round%22/%3E%3Ccircle cx=%2222%22 cy=%2220%22 r=%221.5%22 fill=%22%23E6D675%22/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans:wght@400;500&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Geist:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans:wght@400;500&display=swap" rel="stylesheet">
+<script>try { const t = localStorage.getItem('rc.theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/preview.css">
 </head>
 <body>
-<header class="top">
-  <div class="brand">
-    <span class="brand-mark" aria-hidden="true"></span>
-    <span class="brand-name">rice<i>/</i>cooker</span>
+<header class="nav">
+  <div class="wrap nav-row">
+    <a class="brand" href="#top" aria-label="Rice Cooker, back to top">
+      <svg class="brand-icon" viewBox="0 0 32 32" aria-hidden="true"><path d="M7 15h18v7a4 4 0 0 1-4 4H11a4 4 0 0 1-4-4z"/><path d="M6 15h20M12 11c0-2 2-3 4-3s4 1 4 3"/><circle class="dot" cx="22" cy="20" r="1.5"/></svg>
+      <span>Rice Cooker</span>
+    </a>
+    <nav class="links" aria-label="Sections">
+      <a href="#build">Build</a>
+      <a href="#commands">Commands</a>
+      <a href="#build" data-tab-link="ideas">Inspiration</a>
+      <a href="https://github.com/JPCass07/rice-cooker" id="repoLink">GitHub</a>
+    </nav>
+    <button class="theme-btn" id="themeBtn" type="button" aria-label="Switch light or dark theme"><span class="sun"></span></button>
   </div>
+</header>
 
-  <label class="top-field">
+<section class="hero wrap" id="top">
+  <div class="hero-copy">
+    <p class="kicker">KDE Plasma 6 &nbsp;·&nbsp; Debian, Kubuntu, Fedora, Arch, openSUSE</p>
+    <h1>Cook a rice.<br><span>Serve it on any distro.</span></h1>
+    <p class="lede">Pick colours from your wallpaper, motion, panels and icons, watch it on a live desktop, then take home one script with a backup and an undo. Presets come from your favourite rices and every Hyprland ricing competition winner, rebuilt for KDE.</p>
+    <ul class="pills" aria-label="What it makes">
+      <li>Colour schemes</li><li>Wallpaper palettes</li><li>Rice cycling</li><li>KWin animations</li><li>Panel layouts</li><li>Cross-distro scripts</li>
+    </ul>
+  </div>
+  <figure class="hero-art" aria-hidden="true">
+    <svg viewBox="0 0 400 360" class="pen">
+      <g class="rings"><circle cx="200" cy="200" r="70"/><circle cx="200" cy="200" r="110"/><circle cx="200" cy="200" r="150"/><circle cx="200" cy="200" r="190"/></g>
+      <g class="steam"><path d="M168 110c-10-16 10-24 0-42"/><path d="M200 104c-10-16 10-26 0-48"/><path d="M232 110c-10-16 10-24 0-42"/></g>
+      <path class="ink" d="M118 168h164v74a36 36 0 0 1-36 36H154a36 36 0 0 1-36-36z"/>
+      <path class="ink" d="M106 168h188"/>
+      <path class="ink" d="M150 168c0-20 22-34 50-34s50 14 50 34"/>
+      <path class="ink" d="M192 128h16"/>
+      <path class="ink" d="M140 284l-6 14M260 284l6 14"/>
+      <rect class="ink" x="160" y="204" width="80" height="34" rx="6"/>
+      <circle class="led" cx="226" cy="221" r="5"/>
+      <path class="ink thin" d="M172 221h34"/>
+    </svg>
+    <figcaption class="label l1">Keep warm: backup and undo</figcaption>
+    <figcaption class="label l2">Cook: one script per distro</figcaption>
+  </figure>
+</section>
+
+<section class="toolbar wrap" aria-label="Setup">
+  <label class="field">
     <span>Desktop</span>
     <select id="desktopSel" aria-label="Desktop environment"></select>
   </label>
-
-  <div class="top-field">
+  <div class="field">
     <span>Distro</span>
     <div class="seg" id="distroSeg" role="radiogroup" aria-label="Target distro"></div>
   </div>
-
-  <div class="top-field preset-field">
+  <div class="field grow">
     <span>Preset</span>
     <div class="preset-bar">
       <select id="presetSel" aria-label="Load a preset"></select>
       <button class="btn" id="btnSave" title="Save the current setup as a preset in this browser">Save</button>
       <button class="btn" id="btnExport" title="Download this preset as a .json file">Export</button>
       <label class="btn" title="Load a preset .json file">Import<input type="file" id="importFile" accept=".json,application/json" hidden></label>
-      <button class="btn" id="btnShare" title="Copy a link that opens this preset">Share link</button>
+      <button class="btn" id="btnShare" title="Copy a link that opens this preset">Share</button>
       <button class="btn ghost" id="btnDelete" title="Delete this saved preset">Delete</button>
     </div>
   </div>
-</header>
+</section>
 
-<main class="layout">
+<main class="layout wrap" id="build">
   <aside class="controls">
     <nav class="tabs" id="tabs" role="tablist"></nav>
     <div class="tab-body" id="tabBody"></div>
@@ -50,18 +87,19 @@
 
   <section class="stage">
     <div class="stage-head">
-      <h2><span id="riceName">My rice</span> <small id="riceSub"></small></h2>
+      <h2><span id="riceName">My rice</span> <span class="sub" id="riceSub"></span></h2>
       <div class="play" id="playBar"></div>
     </div>
+    <p class="credit" id="credit" hidden></p>
     <div class="desk-frame">
       <div class="desk" id="desk"></div>
     </div>
     <div class="compat" id="compat"></div>
   </section>
 
-  <section class="output" id="output">
+  <section class="output" id="commands">
     <div class="out-head">
-      <h2>Commands <small id="outFor"></small></h2>
+      <h2>Commands <span class="sub" id="outFor"></span></h2>
       <div class="seg small" id="outMode" role="radiogroup" aria-label="Output format">
         <button data-mode="steps" aria-pressed="true">Steps</button>
         <button data-mode="script" aria-pressed="false">Full script</button>
@@ -76,9 +114,12 @@
   </section>
 </main>
 
-<footer class="foot">
-  Rice Cooker is open source. Colours and settings are generated in your browser; nothing is uploaded.
-  <a href="https://github.com/JPCass07/rice-cooker" id="repoLink">Source on GitHub</a>
+<footer class="foot wrap">
+  <p class="foot-big">Know what you are cooking<br><span>before it hits your desktop.</span></p>
+  <div class="foot-row">
+    <span>Rice Cooker. Open source, MIT. Colours and scripts are made in your browser; nothing is uploaded.</span>
+    <span>Presets credit the rices they are based on: Serpantinum by ilyamiro, Caelestia by soramane, and the Hyprland ricing competition winners listed in the <a href="https://hypr.land/hall_of_fame">hall of fame</a>.</span>
+  </div>
 </footer>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
