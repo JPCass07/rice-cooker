@@ -424,7 +424,7 @@
       const url = URL.createObjectURL(f);
       try {
         const img = await loadImg(url);
-        if (RB.isApp) wallOrig[uniqueName(f.name)] = await new Promise((res) => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(f); });
+        wallOrig[uniqueName(f.name)] = await new Promise((res) => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(f); });
         const w = { name: uniqueName(f.name), palette: 'auto', thumb: shrink(img, 480, 0.72) };
         wallSrc[w.name] = shrink(img, 1600, 0.85);
         analyse(w, img);
@@ -728,6 +728,12 @@
   }
   async function loadState(obj, key) {
     const distro = S ? S.distro : null;
+    obj = clone(obj);
+    // shared .rice files may carry their wallpapers as data URLs
+    (obj.wallpapers || []).forEach((w) => {
+      if (w.image) { wallOrig[w.name] = w.image; wallSrc[w.name] = w.image; delete w.image; }
+    });
+    delete obj.format; delete obj.exported;
     S = normalise(obj);
     if (distro && key && key.startsWith('builtin:')) S.distro = distro; // keep the distro the user picked
     presetKey = key || 'custom';
@@ -741,6 +747,73 @@
       else if (w.thumb && !wallSrc[w.name]) wallSrc[w.name] = w.thumb;
       if (w.palette === 'auto') w.palette = clone(S.palette);
     }
+  }
+
+  /* ---------- rice files and share links ---------- */
+  function riceFile(withImages = true) {
+    const o = clone(S);
+    o.format = 'rice-cooker'; o.exported = new Date().toISOString().slice(0, 10);
+    o.wallpapers.forEach((w) => {
+      if (withImages && !w.gen && !w.url) { const img = wallOrig[w.name] || wallSrc[w.name] || w.thumb; if (img) w.image = img; }
+      if (w.image) delete w.thumb;
+    });
+    return JSON.stringify(o, null, 2);
+  }
+  const fileNameFor = () => `${G.slug(S.name)}.rice`;
+  function shareCode() {
+    const lite = clone(S);
+    lite.wallpapers.forEach((w) => delete w.thumb);
+    return btoa(unescape(encodeURIComponent(JSON.stringify(lite)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+  const WEB = 'https://jpcass07.github.io/rice-cooker/';
+  function saveRiceFile() {
+    const text = riceFile(true);
+    if (RB.isApp) return RB.RCHost.call('saveFile', fileNameFor(), text).then((p) => toast(`Saved to ${p}`)).catch((e) => toast(String(e)));
+    download(fileNameFor(), text, 'application/json');
+    toast('Rice file saved');
+  }
+  function parseRice(text) {
+    const o = JSON.parse(text);
+    if (!o || typeof o !== 'object' || !o.palette || !o.anim) throw new Error('not a rice');
+    return o;
+  }
+  function sheet(html) {
+    const back = document.createElement('div');
+    back.className = 'rc-modal-back';
+    back.innerHTML = `<div class="rc-modal" role="dialog" aria-modal="true"><button class="rc-x" aria-label="Close">×</button><div class="rc-body">${html}</div></div>`;
+    document.body.appendChild(back);
+    const close = () => back.remove();
+    back.querySelector('.rc-x').onclick = close;
+    back.addEventListener('click', (e) => { if (e.target === back) close(); });
+    return { el: back.querySelector('.rc-body'), close };
+  }
+  function shareSheet() {
+    const uploads = S.wallpapers.filter((w) => !w.gen && !w.url).length;
+    const link = `${WEB}#p=${shareCode()}`;
+    const m = sheet(`<h2>Share ${esc(S.name)}<br><span>as a file or a link.</span></h2>
+      <div class="share-opt"><div><b>Rice file</b><p class="rc-p small">A <code>${esc(fileNameFor())}</code> with everything${uploads ? `, including your ${uploads} wallpaper${uploads > 1 ? 's' : ''}` : ''}. Send it to anyone: the Rice Cooker app opens it with a double-click, and the website loads it with Import or by dropping it on the page.</p></div><button class="btn primary" data-a="file">Save rice file</button></div>
+      <div class="share-opt"><div><b>Link</b><p class="rc-p small">Opens this rice on the website, with a button to open it in the app.${uploads ? ' Uploaded wallpapers are too big for a link, so send the file if they matter.' : ''}</p></div><button class="btn" data-a="link">Copy link</button></div>`);
+    m.el.querySelector('[data-a=file]').onclick = () => { saveRiceFile(); m.close(); };
+    m.el.querySelector('[data-a=link]').onclick = () => { copy(link, 'Share link copied'); m.close(); };
+  }
+  /* Anyone can drop a .rice file onto the page */
+  function wireDrop() {
+    document.addEventListener('dragover', (e) => { if ([...(e.dataTransfer?.items || [])].some((i) => i.kind === 'file')) e.preventDefault(); });
+    document.addEventListener('drop', async (e) => {
+      const f = [...(e.dataTransfer?.files || [])].find((x) => /\.(rice|json)$/i.test(x.name));
+      if (!f || e.target.closest('.drop')) return; // the wallpaper drop zone handles images
+      e.preventDefault();
+      try { const o = parseRice(await f.text()); await loadState(o, 'custom'); toast(`Loaded ${S.name}`); }
+      catch (err) { toast('That file is not a Rice Cooker rice'); }
+    });
+  }
+  /* Opened from a share link on the website: offer the app */
+  function openInAppBar(code) {
+    if (RB.isApp) return;
+    const bar = document.createElement('div');
+    bar.className = 'app-bar wrap';
+    bar.innerHTML = `<span>Someone shared <b>${esc(S.name)}</b> with you.</span><span class="row-inline"><a class="btn primary small" href="ricecooker://open?p=${code}">Open in Rice Cooker</a><a class="btn small" href="https://github.com/JPCass07/rice-cooker/releases/latest">Get the app</a></span>`;
+    document.querySelector('.toolbar').before(bar);
   }
 
   function wireHeader() {
@@ -766,26 +839,18 @@
       const sv = saved(); delete sv[k]; LS.set('rb.presets', sv);
       presetKey = 'custom'; renderPresetSel(); toast('Deleted');
     });
-    $('#btnExport').addEventListener('click', () => RB.isApp
-      ? RB.RCHost.call('saveFile', `${G.slug(S.name)}.rice.json`, JSON.stringify(S, null, 2)).then((p) => toast(`Saved to ${p}`)).catch((e) => toast(String(e)))
-      : download(`${G.slug(S.name)}.rice.json`, JSON.stringify(S, null, 2), 'application/json'));
+    $('#btnExport').addEventListener('click', saveRiceFile);
     $('#importFile').addEventListener('change', async (e) => {
       const f = e.target.files[0]; if (!f) return;
       try {
-        const o = JSON.parse(await f.text());
-        if (!o || typeof o !== 'object' || !o.palette) throw new Error('not a preset');
+        const o = parseRice(await f.text());
         await loadState(o, 'custom');
         toast(`Imported "${S.name}"`);
       } catch (err) { toast('That file is not a Rice Cooker preset'); }
       e.target.value = '';
     });
-    $('#btnShare').addEventListener('click', () => {
-      const lite = clone(S);
-      lite.wallpapers.forEach((w) => delete w.thumb);
-      const enc = btoa(unescape(encodeURIComponent(JSON.stringify(lite)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-      const url = `${location.href.split('#')[0]}#p=${enc}`;
-      copy(url, 'Share link copied (uploaded wallpapers are not included)');
-    });
+    $('#btnShare').addEventListener('click', shareSheet);
+    wireDrop();
     $('#outMode').querySelectorAll('button').forEach((b) => b.addEventListener('click', () => {
       outMode = b.dataset.mode;
       $('#outMode').querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', x === b));
@@ -839,6 +904,7 @@
     outT = setTimeout(renderOutput, 120);
     if (presetKey.startsWith('builtin:') && JSON.stringify(normalise(PR.BUILTIN[presetKey.slice(8)]).panel) !== JSON.stringify(S.panel)) { /* keep label */ }
     LS.set('rb.current', { key: presetKey, state: S });
+    if (RB.isApp) { clearTimeout(refresh.saveT); refresh.saveT = setTimeout(() => RB.RCHost.call('saveCurrent', { key: presetKey, state: S }).catch(() => {}), 600); }
   }
 
   /* ---------- start ---------- */
@@ -847,10 +913,10 @@
     wireHeader();
     wireTheme();
     renderTabs();
-    let start = null, key = 'builtin:serpantinum';
+    let start = null, key = 'builtin:serpantinum', sharedCode = null;
     const m = /#p=([\w-]+)/.exec(location.hash);
     if (m) {
-      try { start = JSON.parse(decodeURIComponent(escape(atob(m[1].replace(/-/g, '+').replace(/_/g, '/'))))); key = 'custom'; }
+      try { start = JSON.parse(decodeURIComponent(escape(atob(m[1].replace(/-/g, '+').replace(/_/g, '/'))))); key = 'custom'; sharedCode = m[1]; }
       catch (e) { toast('That share link is damaged'); }
     }
     if (!start) {
@@ -859,6 +925,7 @@
     }
     if (!start) start = clone(PR.BUILTIN.serpantinum);
     await loadState(start, key);
+    if (sharedCode) openInAppBar(sharedCode);
     if (RB.isApp) await RB.appmode.init();
   }
 
@@ -867,7 +934,8 @@
     get state() { return S; },
     loadState, toast, refresh: () => { refresh(); renderTab(); }, renderHeader,
     setTab: (t) => goTab(t),
-    wallSrc, wallOrig, clone,
+    wallSrc, wallOrig, clone, parseRice, riceFile, sheet,
+    get presetKey() { return presetKey; },
     setDistro: (d) => { S.distro = d; renderHeader(); refresh(); renderTab(); },
   };
   document.addEventListener('DOMContentLoaded', init);

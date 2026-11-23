@@ -95,12 +95,33 @@ else echo "No password dialog found (install kdialog or zenity)" >&2; exit 1; fi
 """
 
 
+def b64url_text(code):
+    code = code.strip()
+    return base64.urlsafe_b64decode(code + "=" * (-len(code) % 4)).decode("utf-8")
+
+
+def read_shared(gfile):
+    """A rice handed to the app: a .rice.json file or a ricecooker://open?p=<code> link."""
+    uri = gfile.get_uri() or ""
+    if uri.startswith("ricecooker:"):
+        m = re.search(r"[?#&]p=([\w-]+)", uri)
+        if not m:
+            raise ValueError("the link has no rice in it")
+        return {"name": "", "text": b64url_text(m.group(1))}
+    ok, data, _ = gfile.load_contents(None)
+    if len(data) > 64 * 1024 * 1024:
+        raise ValueError("file too large")
+    return {"name": gfile.get_basename() or "", "text": bytes(data).decode("utf-8")}
+
+
 class Host:
     """Methods the page can call. Each returns JSON-serialisable data."""
 
     def __init__(self, win):
         self.win = win
         self.proc = None
+        self.page_ready = False
+        self.pending = []
         for d in (RICES, RUNS, BACKUPS):
             d.mkdir(parents=True, exist_ok=True)
         askpass = DATA / "askpass.sh"
@@ -129,6 +150,30 @@ class Host:
         state["unboxed"] = bool(value)
         STATE.write_text(json.dumps(state))
         return True
+
+    # --- shared rices and the rice on screen ----------------------------
+    def queue_open(self, gfile):
+        try:
+            item = read_shared(gfile)
+        except Exception as e:  # tell the page instead of failing silently
+            item = {"name": gfile.get_basename() or "", "text": "", "error": str(e)}
+        if self.page_ready:
+            self.win.emit_event("open", item)
+        else:
+            self.pending.append(item)
+
+    def ready(self):
+        self.page_ready = True
+        items, self.pending = self.pending, []
+        return items
+
+    def saveCurrent(self, data):
+        (DATA / "current.json").write_text(json.dumps(data))
+        return True
+
+    def loadCurrent(self):
+        f = DATA / "current.json"
+        return json.loads(f.read_text()) if f.exists() else None
 
     # --- my rices -------------------------------------------------------
     def listRices(self):
@@ -275,10 +320,16 @@ class Window(Adw.ApplicationWindow):
 
 class App(Adw.Application):
     def __init__(self):
-        super().__init__(application_id=APP_ID, flags=Gio.ApplicationFlags.DEFAULT_FLAGS)
+        super().__init__(application_id=APP_ID, flags=Gio.ApplicationFlags.HANDLES_OPEN)
 
     def do_activate(self):
         win = self.get_active_window() or Window(self)
+        win.present()
+
+    def do_open(self, files, n_files, hint):
+        win = self.get_active_window() or Window(self)
+        for f in files:
+            win.host.queue_open(f)
         win.present()
 
 

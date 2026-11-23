@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+  <mime-type type="application/x-rice-cooker">
+    <comment>Rice Cooker rice</comment>
+    <sub-class-of type="application/json"/>
+    <glob pattern="*.rice"/>
+    <icon name="io.github.jpcass07.RiceCooker"/>
+  </mime-type>
+</mime-info>

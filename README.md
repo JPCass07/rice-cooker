@@ -1,8 +1,25 @@
 # Rice Cooker
 
-Build a KDE Plasma 6 rice in your browser, preview it live, save it as a preset, and get the shell commands to apply it on **Debian 13, Kubuntu 26.04, Fedora 43, Arch or openSUSE Tumbleweed**.
+Build a KDE Plasma 6 rice, preview it live, save it as a preset, and apply it on **Debian 13, Kubuntu 26.04, Fedora 43, Arch or openSUSE Tumbleweed**.
 
-**Use it:** <https://jpcass07.github.io/rice-cooker/> or open `index.html` from a download (no build step, no server needed).
+## Get it
+
+| | |
+| --- | --- |
+| **Use it in your browser** | <https://jpcass07.github.io/rice-cooker/>: build a rice and download the script for your distro. Nothing to install. |
+| **Download the desktop app** | [rice-cooker.flatpak](https://github.com/JPCass07/rice-cooker/releases/latest/download/rice-cooker.flatpak) ([all releases](https://github.com/JPCass07/rice-cooker/releases)): applies rices straight to your desktop, keeps your saved rices, and opens `.rice` files people send you. |
+
+Install the app (needs Flatpak and Flathub; the GNOME runtime comes from Flathub automatically):
+
+```bash
+flatpak install --user rice-cooker.flatpak
+flatpak run io.github.jpcass07.RiceCooker
+```
+
+## Sharing rices
+
+- **Rice file:** Share › Save rice file makes a `.rice` file with everything in it, including uploaded wallpapers. Send it to anyone: double-click opens it in the app, and the website loads it with Import or by dropping it on the page.
+- **Link:** Share › Copy link. It opens the rice on the website, with an **Open in Rice Cooker** button that hands it to the app (`ricecooker://` links).
 
 ## Desktop app (Flatpak)
 
@@ -10,10 +27,11 @@ Rice Cooker also comes as a desktop app that applies rices directly, instead of 
 
 - **Unboxing** on first launch: it detects your distro, Plasma version and session, backs up your current desktop, and lets you pick a first rice.
 - **Cook it**: applies the rice on screen and shows a live log with progress. Packages are only installed if missing; when they are, your password is asked by a system dialog (kdialog, zenity or ksshaskpass) and goes straight to `sudo`.
-- **My rices**: save rices and switch between them with one click. Every switch is backed up, and any backup, including your original desktop, can be restored from the same tab.
+- **My rices**: save rices and switch between them with one click. They are kept between launches, and so is the rice you were working on. Every switch is backed up, and any backup, including your original desktop, can be restored from the same tab.
+- **Opens shared rices**: double-click a `.rice` file or follow a `ricecooker://` link and the rice is set up, ready to add to My rices or cook.
 - Wallpapers are saved to `~/Pictures/Wallpapers/rice-cooker` for you; rices live in `~/.local/share/rice-cooker/rices`.
 
-Install the bundle from the [latest release](https://github.com/JPCass07/rice-cooker/releases/latest), or build it:
+Download it from **Get it** above, or build it yourself:
 
 ```bash
 bash desktop/build-flatpak.sh
@@ -51,7 +69,7 @@ Each preset credits the rice it is based on. Only colours and layout ideas are b
 - **Look.** Plasma style, Breeze or Kvantum, Papirus (with folders recoloured to the accent), Tela, Bibata cursors, fonts, title-bar buttons.
 - **Extras.** KDE-Rounded-Corners, Panel Colorizer, Better Blur DX, a big desktop clock, a Caelestia-style widget column (weather, now playing, CPU, memory, calendar), fastfetch, btop and cava, and the [serpantinum-kde](https://github.com/mj0x0/serpantinum-kde) Quickshell shell (Arch only: Quickshell isn't packaged elsewhere).
 - **Cross-distro presets.** Presets are distro-neutral JSON. Switch distro and the commands change (package names, AUR, downloads, builds). Anything that can't work there is marked *"This customisation can't be used on …"* and left out of the script.
-- **Presets.** Save in the browser, export and import `.rice.json`, or share a link.
+- **Presets.** Save in the browser, export and import `.rice` files, or share a link.
 - **Inspiration.** 93 linked rices, competition winners, themes, effects and tools from the research in [`research/REFERENCES.md`](research/REFERENCES.md).
 
 ## Design

@@ -307,9 +307,36 @@
     render();
   }
 
+  /* ---------- a rice arrives (double-clicked file, dropped file or ricecooker:// link) ---------- */
+  async function received(item) {
+    let rice;
+    try { rice = RB.app.parseRice(item.text); }
+    catch (e) { return RB.app.toast(`${item.name || 'That file'} isn't a Rice Cooker rice`); }
+    await RB.app.loadState(rice, 'custom');
+    if (info) { const d = distroFromOs(info.os); if (d) RB.app.setDistro(d); }
+    const s = RB.app.state;
+    const skipped = RB.catalog.requiredFeatures(s).filter((n) => !RB.catalog.compat(n.fid, s.distro, { aur: s.useAur }).ok);
+    const m = modal(`<p class="kicker">A rice arrived${item.name ? `: ${esc(item.name)}` : ''}</p>
+      <h2>${esc(s.name)}<br><span>is set up and ready.</span></h2>
+      <div class="arrived" style="background:${esc(s.palette.bg)};color:${esc(s.palette.fg)}"><b>${esc(s.palette.name)}</b>${sw(s.palette)}</div>
+      ${s.credit ? `<p class="rc-p small">Inspired by ${esc(s.credit.title)} by ${esc(s.credit.by)}.</p>` : ''}
+      ${skipped.length ? `<p class="incompat">${skipped.length} part${skipped.length > 1 ? 's' : ''} can't be used on ${esc(RB.catalog.DISTROS[s.distro].name)} and will be skipped: ${skipped.map((x) => esc(RB.catalog.FEATURES[x.fid].label)).join(', ')}.</p>` : ''}
+      <div class="rc-actions"><button class="btn ghost" data-a="look">Look first</button><button class="btn" data-a="save">Add to My rices</button><button class="btn primary" data-a="cook">Cook it</button></div>`);
+    m.el.querySelector('[data-a=look]').onclick = () => { m.close(); RB.app.setTab('colours'); };
+    m.el.querySelector('[data-a=save]').onclick = async () => { await RCHost.call('saveRice', s.name, RB.app.clone(s)); await loadShelf(); m.close(); RB.app.setTab('mine'); RB.app.toast(`Added ${s.name} to My rices`); };
+    m.el.querySelector('[data-a=cook]').onclick = async () => { await RCHost.call('saveRice', s.name, RB.app.clone(s)); m.close(); cook(s.name); };
+  }
+  RCHost.on('open', received);
+
   /* ---------- start ---------- */
   async function init() {
     info = await RCHost.call('info');
+    // pick up where you left off, unless a shared rice is waiting
+    const waiting = await RCHost.call('ready');
+    if (!waiting.length) {
+      const cur = await RCHost.call('loadCurrent').catch(() => null);
+      if (cur && cur.state && cur.state.palette) await RB.app.loadState(cur.state, cur.key || 'custom');
+    }
     const d = distroFromOs(info.os);
     if (d && RB.app.state.distro !== d) RB.app.setDistro(d);
     // the toolbar gets a Cook button; sharing links makes no sense offline
@@ -319,7 +346,7 @@
     btn.title = 'Apply this rice to your desktop now';
     btn.onclick = cookCurrent;
     bar.prepend(btn);
-    const share = $('#btnShare'); if (share) share.hidden = true;
+
     const dl = $('#btnDownload'); if (dl) { dl.classList.remove('primary'); dl.textContent = 'Save .sh to Downloads'; }
     const out = $('.out-actions');
     const cookOut = btn.cloneNode(true); cookOut.id = ''; cookOut.onclick = cookCurrent; out.prepend(cookOut);
@@ -327,6 +354,7 @@
     await loadShelf();
     RB.app.setTab('mine');
     if (!info.unboxed) unbox();
+    for (const item of waiting) await received(item);
   }
 
   RB.appmode = { init, tabMine, cook, restore };

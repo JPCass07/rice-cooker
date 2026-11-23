@@ -14,5 +14,5 @@
   <url type="homepage">https://jpcass07.github.io/rice-cooker/</url>
   <url type="vcs-browser">https://github.com/JPCass07/rice-cooker</url>
   <content_rating type="oars-1.1"/>
-  <releases><release version="1.0.0" date="2026-11-23"/></releases>
+  <releases><release version="1.0.0" date="2026-11-23"><description><p>First release: unboxing, one-click cooking, My rices, restore, and opening shared .rice files.</p></description></release></releases>
 </component>

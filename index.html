@@ -24,6 +24,7 @@
       <a href="#build">Build</a>
       <a href="#commands">Commands</a>
       <a href="#build" data-tab-link="ideas">Inspiration</a>
+      <a href="https://github.com/JPCass07/rice-cooker/releases/latest" class="dl-link">Download</a>
       <a href="https://github.com/JPCass07/rice-cooker" id="repoLink">GitHub</a>
     </nav>
     <button class="theme-btn" id="themeBtn" type="button" aria-label="Switch light or dark theme"><span class="sun"></span></button>
@@ -35,6 +36,11 @@
     <p class="kicker">KDE Plasma 6 &nbsp;·&nbsp; Debian, Kubuntu, Fedora, Arch, openSUSE</p>
     <h1>Cook a rice.<br><span>Serve it on any distro.</span></h1>
     <p class="lede">Pick colours from your wallpaper, motion, panels and icons, watch it on a live desktop, then take home one script with a backup and an undo. Presets come from your favourite rices and every Hyprland ricing competition winner, rebuilt for KDE.</p>
+    <div class="hero-cta">
+      <a class="btn primary" href="#build">Start cooking</a>
+      <a class="btn" href="https://github.com/JPCass07/rice-cooker/releases/latest/download/rice-cooker.flatpak">Download for Linux <span class="sub">.flatpak</span></a>
+    </div>
+    <p class="cta-note">The desktop app applies rices straight to your desktop and switches between them. Install it with <code>flatpak install --user rice-cooker.flatpak</code>.</p>
     <ul class="pills" aria-label="What it makes">
       <li>Colour schemes</li><li>Wallpaper palettes</li><li>Rice cycling</li><li>KWin animations</li><li>Panel layouts</li><li>Cross-distro scripts</li>
     </ul>
@@ -72,7 +78,7 @@
       <select id="presetSel" aria-label="Load a preset"></select>
       <button class="btn" id="btnSave" title="Save the current setup as a preset in this browser">Save</button>
       <button class="btn" id="btnExport" title="Download this preset as a .json file">Export</button>
-      <label class="btn" title="Load a preset .json file">Import<input type="file" id="importFile" accept=".json,application/json" hidden></label>
+      <label class="btn" title="Load a preset .json file">Import<input type="file" id="importFile" accept=".rice,.json,application/json" hidden></label>
       <button class="btn" id="btnShare" title="Copy a link that opens this preset">Share</button>
       <button class="btn ghost" id="btnDelete" title="Delete this saved preset">Delete</button>
     </div>

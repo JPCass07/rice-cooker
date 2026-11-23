@@ -17,12 +17,13 @@ fi
 
 flatpak build-init "$OUT/app" "$APP" "$RUNTIME" "$RUNTIME" "$BRANCH"
 F="$OUT/app/files"
-mkdir -p "$F/bin" "$F/share/rice-cooker/web" "$F/share/applications" "$F/share/icons/hicolor/scalable/apps" "$F/share/metainfo"
+mkdir -p "$F/bin" "$F/share/rice-cooker/web" "$F/share/applications" "$F/share/icons/hicolor/scalable/apps" "$F/share/metainfo" "$F/share/mime/packages"
 cp -r index.html css js research LICENSE README.md "$F/share/rice-cooker/web/"
 install -m755 desktop/rice-cooker.py "$F/bin/rice-cooker"
 install -m644 "desktop/$APP.desktop" "$F/share/applications/"
 install -m644 "desktop/$APP.svg" "$F/share/icons/hicolor/scalable/apps/"
 install -m644 "desktop/$APP.metainfo.xml" "$F/share/metainfo/"
+install -m644 "desktop/$APP.mime.xml" "$F/share/mime/packages/$APP.xml"
 
 # org.freedesktop.Flatpak = flatpak-spawn --host: the app has to run the rice script on
 # the real desktop (plasma-apply-*, kwriteconfig6, sudo for packages).

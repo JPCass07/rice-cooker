@@ -367,3 +367,21 @@ pre.code .c { color: var(--ink-2); }
 .backups { display: flex; flex-direction: column; }
 .bk { display: flex; justify-content: space-between; align-items: center; gap: 10px; border-top: 1px solid var(--line); padding: 9px 0; font-size: 14px; }
 @media (max-width: 640px) { .ub-grid { grid-template-columns: 1fr 1fr; } .ub-facts { grid-template-columns: 1fr; } .rc-modal.wide { padding: 26px 20px; } }
+
+/* ---------- hero calls to action ---------- */
+.hero-cta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
+.hero-cta .btn { min-height: 44px; padding: 10px 18px; font-size: 15px; text-decoration: none; }
+.cta-note { margin-top: 12px; font-size: 13px; color: var(--ink-2); max-width: 60ch; }
+.app-mode .dl-link { display: none; }
+
+/* ---------- sharing ---------- */
+.share-opt { display: flex; align-items: center; justify-content: space-between; gap: 18px; border-top: 1px solid var(--line); padding: 16px 0; margin-top: 10px; }
+.share-opt:first-of-type { margin-top: 22px; }
+.share-opt b { font-weight: 500; font-size: 15px; }
+.share-opt .rc-p { margin-top: 4px; }
+.share-opt .btn { flex: none; }
+.arrived { margin-top: 20px; border: 1px solid var(--line-2); border-radius: var(--radius); padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.arrived b { font-weight: 600; }
+.app-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 20px; padding-top: 12px; padding-bottom: 12px; border-top: 1px solid var(--line); font-size: 14px; }
+.app-bar b { font-weight: 600; }
+@media (max-width: 640px) { .share-opt { flex-direction: column; align-items: stretch; } }
