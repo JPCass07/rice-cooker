@@ -47,7 +47,7 @@
       menu: '"org.kde.plasma.kickoff"', tasks: `["org.kde.plasma.icontasks", {General: {launchers: "${launchers}"}}]`,
       spacer: '"org.kde.plasma.panelspacer"', clock: '"org.kde.plasma.digitalclock"', tray: '"org.kde.plasma.systemtray"',
       pager: '"org.kde.plasma.pager"', sep: '"org.kde.plasma.marginsseparator"', desk: '"org.kde.plasma.showdesktop"',
-      gmenu: '"org.kde.plasma.appmenu"',
+      gmenu: '"org.kde.plasma.appmenu"', media: '"org.kde.plasma.mediacontroller"',
     };
     const P = (o) => `makePanel(${JSON.stringify(Object.assign({}, o, { widgets: undefined }))}, [${o.widgets.map((w) => W[w]).join(', ')}]);`;
     const layouts = {
@@ -56,12 +56,16 @@
         P({ location: 'bottom', height: 54, lengthMode: 'fit', alignment: 'center', floating: true, hiding: 'dodgewindows', widgets: ['tasks'] }),
       ],
       serpantinum: [
-        P({ location: 'top', height: 26, lengthMode: 'fill', floating: false, widgets: ['pager', 'spacer', 'clock', 'spacer', 'tray'] }),
+        P({ location: 'top', height: 26, lengthMode: 'fill', floating: false, widgets: ['pager', 'spacer', 'clock', 'media', 'spacer', 'tray'] }),
         P({ location: 'bottom', height: 44, lengthMode: 'fit', alignment: 'center', floating: true, hiding: 'dodgewindows', widgets: ['tasks'] }),
       ],
       island: [
         P({ location: 'top', height: 30, lengthMode: 'fit', alignment: 'center', floating: true, widgets: ['menu', 'pager', 'clock', 'tray'] }),
         P({ location: 'bottom', height: 50, lengthMode: 'fit', alignment: 'center', floating: true, hiding: 'dodgewindows', widgets: ['tasks'] }),
+      ],
+      topdock: [
+        P({ location: 'left', height: 44, lengthMode: 'fill', floating: true, widgets: ['menu', 'pager', 'tasks', 'spacer', 'tray'] }),
+        P({ location: 'top', height: 34, lengthMode: 'fit', alignment: 'center', floating: true, widgets: ['clock', 'media'] }),
       ],
       leftbar: [P({ location: 'left', height: 46, lengthMode: 'fill', floating: true, widgets: ['menu', 'pager', 'tasks', 'spacer', 'tray', 'clock'] })],
       dock: [P({ location: 'bottom', height: 54, lengthMode: 'fit', alignment: 'center', floating: true, widgets: ['menu', 'tasks', 'sep', 'tray', 'clock'] })],
@@ -437,6 +441,33 @@ JS_EOF
         Q,
         '"$Q" org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript "$RB_CLOCK_JS"',
       ], 'Adds a large Digital Clock widget to the desktop of the primary screen. Move or resize it in Edit Mode.');
+    }
+    if (has('widgetColumn')) {
+      step('widgets', 'Widget column on the desktop', [
+        `RB_WIDGETS_JS=$(cat <<'JS_EOF'
+var g = screenGeometry(0);
+var col = [
+  ["org.kde.plasma.weather", 150],
+  ["org.kde.plasma.mediacontroller", 170],
+  ["org.kde.plasma.systemmonitor.cpu", 150],
+  ["org.kde.plasma.systemmonitor.memory", 150],
+  ["org.kde.plasma.calendar", 260]
+];
+var ds = desktops();
+for (var i = 0; i < ds.length; i++) {
+  if (ds[i].screen !== 0) continue;
+  var y = 70;
+  for (var k = 0; k < col.length; k++) {
+    if (knownWidgetTypes.indexOf(col[k][0]) < 0) { print("skipping " + col[k][0] + ": not installed"); continue; }
+    ds[i].addWidget(col[k][0], g.width - 360, y, 320, col[k][1]);
+    y += col[k][1] + 14;
+  }
+}
+JS_EOF
+)`,
+        Q,
+        '"$Q" org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript "$RB_WIDGETS_JS"',
+      ], 'Stacks Plasma desktop widgets down the right edge of the primary screen, like the Caelestia dashboard column. Set your town in the weather widget once (right-click > Configure).');
     }
     if (has('serpKde')) {
       step('serpkde', 'Serpantinum-KDE shell', [

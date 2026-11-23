@@ -476,6 +476,7 @@
   /* ---------- panels ---------- */
   const MINI = {
     keep: [[6, 82, 88, 12]],
+    topdock: [[2, 5, 7, 90], [38, 4, 24, 10]],
     leftbar: [[2, 5, 8, 90]],
     serpantinum: [[0, 0, 100, 7], [36, 85, 28, 10]],
     island: [[34, 5, 32, 10], [30, 83, 40, 12]],
@@ -494,7 +495,7 @@
       const b = document.createElement('button');
       b.type = 'button'; b.className = 'lay';
       b.setAttribute('aria-pressed', S.panel === o.id);
-      b.innerHTML = `<div class="mini">${MINI[o.id].map(([l, t, w, h]) => `<i style="left:${l}%;top:${t}%;width:${w}%;height:${h}%;border-radius:${o.id === 'leftbar' || o.id === 'island' || (o.id === 'serpantinum' && t > 50) ? '6px' : o.id === 'dock' || (o.id === 'topbar-dock' && t > 50) ? '5px' : '1px'}"></i>`).join('')}</div>
+      b.innerHTML = `<div class="mini">${MINI[o.id].map(([l, t, w, h]) => `<i style="left:${l}%;top:${t}%;width:${w}%;height:${h}%;border-radius:${o.id === 'leftbar' || o.id === 'topdock' || o.id === 'island' || (o.id === 'serpantinum' && t > 50) ? '6px' : o.id === 'dock' || (o.id === 'topbar-dock' && t > 50) ? '5px' : '1px'}"></i>`).join('')}</div>
         <span class="t">${esc(o.label)}</span><span class="h">${esc(o.hint || 'no changes')}</span>`;
       b.addEventListener('click', () => { S.panel = o.id; refresh(); renderTab(); });
       grid.appendChild(b);
@@ -514,6 +515,7 @@
     g.appendChild(toggleRow(FEATURES.panelColorizer.label, () => S.extras.panelColorizer, (v) => { S.extras.panelColorizer = v; }, 'panelColorizer'));
     g.appendChild(toggleRow(FEATURES.betterBlur.label, () => S.extras.betterBlur, (v) => { S.extras.betterBlur = v; }, 'betterBlur'));
     g.appendChild(toggleRow(FEATURES.termExtras.label, () => S.extras.termExtras, (v) => { S.extras.termExtras = v; }, 'termExtras'));
+    g.appendChild(toggleRow(FEATURES.widgetColumn.label, () => S.extras.widgetColumn, (v) => { S.extras.widgetColumn = v; }, 'widgetColumn', 'The stack of cards down the right side of Caelestia.'));
     g.appendChild(toggleRow(FEATURES.bigClock.label, () => S.extras.bigClock, (v) => { S.extras.bigClock = v; }, 'bigClock', 'The giant clock seen in Hybrid Summer, Golden Era and the Nothing rices.'));
     body.appendChild(g);
 
@@ -711,6 +713,7 @@
     bar.innerHTML = '';
     bar.append(playBtn('switcher', 'Alt+Tab'), playBtn('open', 'Open'), playBtn('minimize', 'Minimise'), playBtn('desktop', 'Desktops'));
     if (S.anim.cube) bar.appendChild(playBtn('cube', 'Cube'));
+    if (['topdock', 'serpantinum', 'island'].includes(S.panel)) bar.appendChild(playBtn('dash', 'Top dock'));
     if (S.wallpapers.length > 1) {
       const b = document.createElement('button');
       b.className = 'btn small'; b.type = 'button'; b.textContent = cycling ? '■ Stop cycle' : '▶ Cycle rices';

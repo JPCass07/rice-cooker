@@ -126,6 +126,10 @@
     },
     shakeCursor: { label: 'Shake cursor to find it', builtin: true, minPlasma: '6.2' },
     bigClock: { label: 'Big clock on the desktop', builtin: true },
+    widgetColumn: {
+      label: 'Widget column on the desktop (weather, now playing, CPU, memory, calendar)',
+      pkgs: { debian: 'plasma-widgets-addons', ubuntu: 'plasma-widgets-addons', fedora: 'kdeplasma-addons', arch: 'kdeplasma-addons', opensuse: 'kdeplasma6-addons' },
+    },
     serpKde: {
       label: 'Serpantinum-KDE shell (Quickshell bar, dock, launcher, panels)',
       pkgs: { debian: null, ubuntu: null, fedora: null, arch: ['quickshell', 'git'], opensuse: null },
@@ -253,7 +257,8 @@
     ],
     panel: [
       { id: 'keep', label: 'Leave my panels alone' },
-      { id: 'leftbar', label: 'Floating left bar', hint: 'Caelestia-like' },
+      { id: 'topdock', label: 'Top dock + side rail', hint: 'Caelestia / Serpantinum' },
+      { id: 'leftbar', label: 'Floating left bar', hint: 'Caelestia rail only' },
       { id: 'serpantinum', label: 'Thin bar, centred clock + mini dock', hint: 'Serpantinum-like' },
       { id: 'island', label: 'Floating island + dock', hint: 'dynamic-island look' },
       { id: 'topbar-dock', label: 'Top bar + floating dock', hint: 'macOS-like' },
@@ -289,6 +294,7 @@
     if (s.extras.panelColorizer) add('panelColorizer', 'Panel Colorizer');
     if (s.extras.termExtras) add('termExtras', 'Terminal extras');
     if (s.extras.bigClock) add('bigClock', 'Desktop clock');
+    if (s.extras.widgetColumn) add('widgetColumn', 'Widget column');
     if (s.extras.serpKde) add('serpKde', 'Serpantinum-KDE');
     return need;
   }

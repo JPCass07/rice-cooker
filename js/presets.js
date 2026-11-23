@@ -140,7 +140,7 @@
     decor: { buttons: 'keep', borderlessMax: false, noBorders: false },
     anim: { switcher: 'thumbnail_grid', openClose: 'scale', minimize: 'magiclamp', desktopSwitch: 'slide', speed: 1, wobbly: false, blur: true, blurStrength: 8, blurNoise: 0, translucency: false, dimInactive: false, slidingPopups: true, cube: false, shakeCursor: false },
     panel: 'keep',
-    extras: { roundedCorners: false, betterBlur: false, panelColorizer: false, termExtras: false, bigClock: false, serpKde: false },
+    extras: { roundedCorners: false, betterBlur: false, panelColorizer: false, termExtras: false, bigClock: false, serpKde: false, widgetColumn: false },
     wallpapers: [], activeWallpaper: 0,
     cycle: { enabled: false, interval: 'off', order: 'next' },
   });
@@ -173,7 +173,7 @@
       fonts: { ui: 'Inter', mono: 'JetBrainsMono Nerd Font', size: 10 }, colors: { kitty: true, termOpacity: 0.86 },
       decor: { buttons: 'minimal', borderlessMax: true, noBorders: true },
       anim: { switcher: 'thumbnail_grid', openClose: 'glide', minimize: 'magiclamp', desktopSwitch: 'slide', speed: 1.5, blur: true, blurStrength: 12, blurNoise: 2 },
-      panel: 'leftbar', extras: { roundedCorners: true, termExtras: true },
+      panel: 'topdock', extras: { roundedCorners: true, termExtras: true, widgetColumn: true },
       wallpapers: [wall('nebula', 'caelestia'), wall('aurora'), wall('tealdusk')],
       cycle: { enabled: true, interval: '1h', order: 'next' },
     }),

@@ -67,6 +67,45 @@
 .bigclock { position: absolute; left: 50%; top: 13%; transform: translateX(-50%); z-index: 1; text-align: center; font: 700 9cqi/1 var(--mono-font), monospace; color: var(--p-fg); opacity: .92; letter-spacing: -.02em; text-shadow: 0 .4cqi 2cqi rgba(0,0,0,.35); }
 .bigclock small { display: block; font: 500 1.4cqi var(--ui-font), sans-serif; color: var(--p-dim); margin-top: .8cqi; letter-spacing: .1em; text-transform: uppercase; }
 
+/* Caelestia-style top dock pill, now playing and dashboard */
+.pnl.tdock { height: 3.6cqi; padding: 0 1.6cqi; gap: 1.6cqi; }
+.clock2 { font-weight: 600; white-space: nowrap; display: flex; gap: .7cqi; align-items: baseline; font-variant-numeric: tabular-nums; }
+.clock2 em { font-style: normal; font-weight: 400; color: var(--p-dim); font-size: 1.05cqi; }
+.np { display: flex; align-items: center; gap: .7cqi; white-space: nowrap; }
+.np .tt em { font-style: normal; color: var(--p-dim); margin-left: .4cqi; }
+.art { display: block; width: 1.9cqi; height: 1.9cqi; border-radius: .4cqi; background: linear-gradient(135deg, var(--p-accent), var(--p-accent2)); flex-shrink: 0; }
+.art.big { width: 7cqi; height: 7cqi; border-radius: .8cqi; }
+.viz { display: inline-flex; gap: .2cqi; align-items: flex-end; height: 1.4cqi; }
+.viz b { width: .3cqi; background: var(--p-accent); border-radius: 2px; animation: viz 1s ease-in-out infinite alternate; }
+.viz b:nth-child(1) { animation-delay: -.2s; } .viz b:nth-child(2) { animation-delay: -.6s; } .viz b:nth-child(3) { animation-delay: -.1s; } .viz b:nth-child(4) { animation-delay: -.8s; } .viz b:nth-child(5) { animation-delay: -.4s; }
+@keyframes viz { from { height: 20%; } to { height: 100%; } }
+.dash { position: absolute; left: 50%; top: 4.6cqi; transform: translate(-50%, 0); transform-origin: 50% 0; z-index: 11; width: 58%; padding: 1.2cqi; border-radius: 1.6cqi;
+  background: color-mix(in srgb, var(--p-bg2) 92%, transparent); backdrop-filter: blur(14px); border: 1px solid color-mix(in srgb, var(--p-fg) 12%, transparent); box-shadow: 0 2cqi 5cqi rgba(0,0,0,.45); font-size: 1.1cqi; }
+.dtabs { display: flex; justify-content: center; gap: 2.4cqi; color: var(--p-dim); margin-bottom: 1cqi; }
+.dtabs .on { color: var(--p-accent); border-bottom: 2px solid var(--p-accent); padding-bottom: .3cqi; }
+.dgrid { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: .9cqi; }
+.dcard, .wc { background: color-mix(in srgb, var(--p-surface) 85%, transparent); border-radius: 1cqi; padding: .9cqi 1cqi; display: flex; flex-direction: column; gap: .4cqi; }
+.dcard b, .wc b { font-weight: 600; }
+.dcard span, .wc span { color: var(--p-dim); }
+.dcard.media, .wc.np2 { flex-direction: row; align-items: center; gap: .9cqi; }
+.dcard.media > div, .wc.np2 > div { display: flex; flex-direction: column; gap: .3cqi; min-width: 0; flex: 1; }
+.bar { display: block; height: .35cqi; background: color-mix(in srgb, var(--p-fg) 15%, transparent); border-radius: 9px; overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--p-accent); }
+.ctl { letter-spacing: .4cqi; color: var(--p-fg) !important; }
+.rings { display: flex; gap: .8cqi; justify-content: space-around; }
+.rings span { display: flex; flex-direction: column; align-items: center; gap: .3cqi; font-size: .9cqi; }
+.rings i { width: 3.4cqi; height: 3.4cqi; border-radius: 50%; background: conic-gradient(var(--p-accent) calc(var(--v) * 1%), color-mix(in srgb, var(--p-fg) 14%, transparent) 0); -webkit-mask: radial-gradient(circle, transparent 55%, #000 57%); mask: radial-gradient(circle, transparent 55%, #000 57%); }
+.eq { display: flex; gap: .25cqi; align-items: flex-end; height: 3cqi; }
+.eq i { flex: 1; background: var(--p-accent2); border-radius: 2px; animation: viz 1.2s ease-in-out infinite alternate; }
+.eq i:nth-child(odd) { animation-delay: -.5s; } .eq i:nth-child(3n) { animation-delay: -.9s; }
+.wcol { position: absolute; right: 1.2cqi; top: 5cqi; width: 17cqi; z-index: 2; display: flex; flex-direction: column; gap: .7cqi; font-size: 1cqi; }
+.wc { backdrop-filter: blur(var(--blur)); }
+.wc.rings { flex-direction: row; }
+.wcol .rings i { width: 2.8cqi; height: 2.8cqi; }
+.wc.cal .days { display: grid; grid-template-columns: repeat(7, 1fr); gap: .2cqi; font-size: .8cqi; text-align: center; }
+.wc.cal .days i { font-style: normal; color: var(--p-dim); }
+.wc.cal .days i.on { background: var(--p-accent); color: var(--p-on-accent); border-radius: 50%; }
+
 /* windows */
 .win {
   position: absolute; border-radius: var(--rad); overflow: hidden; z-index: 3;

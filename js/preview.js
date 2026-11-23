@@ -81,14 +81,17 @@
     tray: '<div class="tray"><i></i><i></i><i></i></div>', pager: '<div class="pager"><i></i><i></i><i></i></div>',
     gmenu: '<div class="gmenu"><span>Dolphin</span><span>File</span><span>Edit</span><span>View</span></div>', desk: '<div class="desk-btn"></div>',
     sep: '<div style="width:1px;height:2.4cqi;background:var(--p-dim);opacity:.4"></div>',
+    media: '<div class="np"><i class="art"></i><span class="tt">Everlong <em>Foo Fighters</em></span><span class="viz"><b></b><b></b><b></b><b></b><b></b></span></div>',
+    clock2: '<div class="clock2">05:30<em>Wed 19 Nov</em></div>',
   };
   const bar = (cls, items) => `<div class="pnl ${cls}">${items.map((i) => (i === 'tasks' ? tasks() : W[i])).join('')}</div>`;
   function renderPanels(layout) {
     const L = {
       keep: [bar('bottom floating', ['menu', 'pager', 'tasks', 'sp', 'tray', 'clock', 'desk'])],
       'topbar-dock': [bar('top', ['menu', 'gmenu', 'sp', 'clock', 'sp', 'tray']), bar('bottom floating fit dock', ['tasks'])],
-      serpantinum: [bar('top thin serp', ['pager', 'sp', 'clock', 'sp', 'tray']), bar('bottom floating fit dock mini', ['tasks'])],
+      serpantinum: [bar('top thin serp', ['pager', 'sp', 'clock', 'media', 'sp', 'tray']), bar('bottom floating fit dock mini', ['tasks'])],
       island: [bar('top floating fit island', ['menu', 'pager', 'clock', 'tray']), bar('bottom floating fit dock', ['tasks'])],
+      topdock: [bar('left floatl', ['menu', 'pager', 'tasks', 'sp', 'tray']), bar('top floating fit island tdock', ['clock2', 'media'])],
       leftbar: [bar('left floatl', ['menu', 'pager', 'tasks', 'sp', 'tray', 'clock'])],
       dock: [bar('bottom floating fit dock', ['menu', 'tasks', 'sep', 'tray', 'clock'])],
       win11: [bar('bottom', ['sp', 'menu', 'tasks', 'sp', 'tray', 'clock', 'desk'])],
@@ -98,7 +101,9 @@
     };
     panels.innerHTML = (L[layout] || L.keep).join('');
     // keep windows clear of a left launcher
-    files.style.left = layout === 'unity' || layout === 'leftbar' ? '17%' : '';
+    files.style.left = ['unity', 'leftbar', 'topdock'].includes(layout) ? '13%' : '';
+    const dock = panels.querySelector('.tdock, .serp, .island');
+    if (dock) { dock.style.cursor = 'pointer'; dock.title = 'Open the dashboard'; dock.addEventListener('click', () => play('dash')); }
   }
 
   const fam = (f, mono) => {
@@ -126,6 +131,15 @@
       if (!bc) { bc = el('div', 'bigclock'); space.prepend(bc); }
       bc.innerHTML = '14:32<small>Sunday 23 November</small>';
     } else if (bc) bc.remove();
+    let wc = desk.querySelector('.wcol');
+    if (s.extras.widgetColumn) {
+      if (!wc) { wc = el('div', 'wcol'); space.appendChild(wc); }
+      wc.innerHTML = `<div class="wc"><b>Good morning</b><span>☁ 9°C, Reading</span></div>
+        <div class="wc np2"><i class="art"></i><div><b>Everlong</b><span>Foo Fighters</span><span class="bar"><i style="width:42%"></i></span></div></div>
+        <div class="wc rings"><span><i style="--v:63"></i>CPU</span><span><i style="--v:41"></i>RAM</span><span><i style="--v:28"></i>GPU</span></div>
+        <div class="wc cal"><b>November</b><span class="days">${Array.from({ length: 28 }, (_, i) => `<i class="${i === 18 ? 'on' : ''}">${i + 1}</i>`).join('')}</span></div>`;
+      term.style.left = '38%';
+    } else { if (wc) wc.remove(); term.style.left = ''; }
   }
 
   function setWall(src, instant) {
@@ -294,18 +308,36 @@
     hideBadge();
   }
 
+  /* ---------- top dock dashboard (Caelestia-style drop-down) ---------- */
+  async function playDash() {
+    showBadge('Top dock: click it for the dashboard');
+    const d = el('div', 'dash');
+    d.innerHTML = `<div class="dtabs"><span class="on">Dashboard</span><span>Media</span><span>Performance</span><span>Weather</span></div>
+      <div class="dgrid">
+        <div class="dcard media"><i class="art big"></i><div><b>Everlong</b><span>Foo Fighters</span><span class="bar"><i style="width:58%"></i></span><span class="ctl">⏮ ⏸ ⏭</span></div></div>
+        <div class="dcard"><b>Performance</b><div class="rings"><span><i style="--v:63"></i>CPU</span><span><i style="--v:41"></i>RAM</span><span><i style="--v:74"></i>Disk</span></div></div>
+        <div class="dcard"><b>9°C</b><span>Cloudy, Reading</span><span class="eq">${'<i></i>'.repeat(12)}</span></div>
+      </div>`;
+    desk.appendChild(d);
+    await anim(d, [{ opacity: 0, transform: 'translate(-50%, -12%) scaleY(.2)' }, { opacity: 1, transform: 'translate(-50%, 0) scaleY(1)' }], { duration: dur(320), easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'forwards' });
+    await wait(2600);
+    await anim(d, [{ opacity: 1, transform: 'translate(-50%, 0) scaleY(1)' }, { opacity: 0, transform: 'translate(-50%, -12%) scaleY(.2)' }], { duration: dur(220), easing: 'ease-in', fill: 'forwards' });
+    d.remove();
+    hideBadge();
+  }
+
   async function play(kind) {
     if (busy || !S) return;
     busy = true;
     try {
-      const run = ({ open: playOpen, minimize: playMinimize, desktop: playDesktop, switcher: playSwitcher, cube: playCube }[kind] || (async () => {}))();
+      const run = ({ dash: playDash, open: playOpen, minimize: playMinimize, desktop: playDesktop, switcher: playSwitcher, cube: playCube }[kind] || (async () => {}))();
       // never let a stalled animation (e.g. a background tab) lock the buttons
       await Promise.race([run, wait(9000)]);
     } finally {
       busy = false;
       files.style.visibility = ''; files.style.transformOrigin = '';
       ov.classList.remove('show'); hideBadge();
-      desk.querySelectorAll('.shard').forEach((x) => x.remove());
+      desk.querySelectorAll('.shard, .dash').forEach((x) => x.remove());
     }
   }
 
