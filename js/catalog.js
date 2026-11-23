@@ -13,26 +13,31 @@
     debian: {
       name: 'Debian 13', long: 'Debian 13 "trixie"', plasma: '6.3', family: 'apt',
       install: (p) => `sudo apt update && sudo apt install -y ${p.join(' ')}`,
+      has: 'dpkg -s', installMissing: 'sudo apt update && sudo apt install -y',
       osIds: ['debian'],
     },
     ubuntu: {
       name: 'Kubuntu 26.04', long: 'Kubuntu 26.04 LTS', plasma: '6.6', family: 'apt',
       install: (p) => `sudo apt update && sudo apt install -y ${p.join(' ')}`,
+      has: 'dpkg -s', installMissing: 'sudo apt update && sudo apt install -y',
       osIds: ['ubuntu', 'kubuntu', 'neon'],
     },
     fedora: {
       name: 'Fedora 43', long: 'Fedora KDE Plasma 43', plasma: '6.7', family: 'dnf',
       install: (p) => `sudo dnf install -y ${p.join(' ')}`,
+      has: 'rpm -q', installMissing: 'sudo dnf install -y',
       osIds: ['fedora'],
     },
     arch: {
       name: 'Arch', long: 'Arch Linux (also EndeavourOS, CachyOS)', plasma: '6.8', family: 'pacman',
       install: (p) => `sudo pacman -S --needed --noconfirm ${p.join(' ')}`,
+      has: 'pacman -Q', installMissing: 'sudo pacman -S --needed --noconfirm',
       osIds: ['arch', 'endeavouros', 'cachyos', 'manjaro'],
     },
     opensuse: {
       name: 'openSUSE TW', long: 'openSUSE Tumbleweed', plasma: '6.8', family: 'zypper',
       install: (p) => `sudo zypper --non-interactive install ${p.join(' ')}`,
+      has: 'rpm -q', installMissing: 'sudo zypper --non-interactive install',
       osIds: ['opensuse-tumbleweed', 'opensuse'],
     },
   };

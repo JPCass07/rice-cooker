@@ -13,6 +13,7 @@
   let outMode = 'steps';
   let presetKey = 'builtin:serpantinum';
   const wallSrc = {};          // name -> preview data URL
+  const wallOrig = {};         // name -> original file as data URL (desktop app saves these)
   const clusters = {};         // name -> extracted colours
   const sugg = {};             // name -> suggested schemes
   const openSugg = new Set();
@@ -139,6 +140,7 @@
 
   /* ---------- tabs ---------- */
   const TABS = [
+    ...(RB.isApp ? [['mine', 'My rices']] : []),
     ['colours', 'Colours'], ['walls', 'Wallpapers'], ['look', 'Look'], ['anim', 'Motion'],
     ['panels', 'Panels'], ['extras', 'Extras'], ['ideas', 'Inspiration'],
   ];
@@ -152,7 +154,7 @@
     const body = $('#tabBody');
     const scroll = body.scrollTop;
     body.innerHTML = '';
-    ({ colours: tabColours, walls: tabWalls, look: tabLook, anim: tabAnim, panels: tabPanels, extras: tabExtras, ideas: tabIdeas }[tab])(body);
+    ({ mine: (b) => RB.appmode.tabMine(b), colours: tabColours, walls: tabWalls, look: tabLook, anim: tabAnim, panels: tabPanels, extras: tabExtras, ideas: tabIdeas }[tab])(body);
     body.scrollTop = scroll;
   }
 
@@ -336,6 +338,7 @@
       const url = URL.createObjectURL(f);
       try {
         const img = await loadImg(url);
+        if (RB.isApp) wallOrig[uniqueName(f.name)] = await new Promise((res) => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(f); });
         const w = { name: uniqueName(f.name), palette: 'auto', thumb: shrink(img, 480, 0.72) };
         wallSrc[w.name] = shrink(img, 1600, 0.85);
         analyse(w, img);
@@ -551,7 +554,7 @@
       const inst = i.install && i.install[S.distro];
       const d = document.createElement('div');
       d.className = 'idea';
-      d.innerHTML = `${i.url ? `<a href="${esc(i.url)}" target="_blank" rel="noopener">${esc(i.name)}</a>` : `<b style="font-weight:500">${esc(i.name)}</b>`}<span class="tag">${esc(i.category)}</span>${i.winner ? `<span class="tag win">${esc(i.winner)}</span>` : ''}${i.plasma6 === 'yes' ? '<span class="tag yes">Plasma 6</span>' : i.plasma6 === 'no' ? '<span class="tag">Plasma 5 only</span>' : ''}
+      d.innerHTML = `${i.url ? `<a href="${esc(i.url)}" target="_blank" rel="noopener">${esc(i.name)}</a>` : `<b style="font-weight:500">${esc(i.name)}</b>`}<span class="tag">${esc(i.category)}</span>${i.winner ? `<span class="tag gold">${esc(i.winner)}</span>` : ''}${i.plasma6 === 'yes' ? '<span class="tag yes">Plasma 6</span>' : i.plasma6 === 'no' ? '<span class="tag">Plasma 5 only</span>' : ''}
         <p>${esc(i.notes || '')}</p>${inst ? `<p><b>${esc(DISTROS[S.distro].name)}:</b> ${esc(inst)}</p>` : ''}`;
       list.appendChild(d);
     });
@@ -677,7 +680,9 @@
       const sv = saved(); delete sv[k]; LS.set('rb.presets', sv);
       presetKey = 'custom'; renderPresetSel(); toast('Deleted');
     });
-    $('#btnExport').addEventListener('click', () => download(`${G.slug(S.name)}.rice.json`, JSON.stringify(S, null, 2), 'application/json'));
+    $('#btnExport').addEventListener('click', () => RB.isApp
+      ? RB.RCHost.call('saveFile', `${G.slug(S.name)}.rice.json`, JSON.stringify(S, null, 2)).then((p) => toast(`Saved to ${p}`)).catch((e) => toast(String(e)))
+      : download(`${G.slug(S.name)}.rice.json`, JSON.stringify(S, null, 2), 'application/json'));
     $('#importFile').addEventListener('change', async (e) => {
       const f = e.target.files[0]; if (!f) return;
       try {
@@ -700,7 +705,9 @@
       $('#outMode').querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', x === b));
       renderOutput();
     }));
-    $('#btnDownload').addEventListener('click', () => download(`${G.slug(S.name)}-${S.distro}.sh`, G.buildScript(S, S.distro), 'text/x-shellscript'));
+    $('#btnDownload').addEventListener('click', () => RB.isApp
+      ? RB.RCHost.call('saveFile', `${G.slug(S.name)}-${S.distro}.sh`, G.buildScript(S, S.distro)).then((p) => toast(`Saved to ${p}`)).catch((e) => toast(String(e)))
+      : download(`${G.slug(S.name)}-${S.distro}.sh`, G.buildScript(S, S.distro), 'text/x-shellscript'));
     $('#btnCopyAll').addEventListener('click', () => copy(G.buildScript(S, S.distro), 'Script copied'));
     $('#riceName').addEventListener('click', () => {
       const n = prompt('Rice name:', S.name);
@@ -766,6 +773,16 @@
     }
     if (!start) start = clone(PR.BUILTIN.serpantinum);
     await loadState(start, key);
+    if (RB.isApp) await RB.appmode.init();
   }
+
+  // what the desktop app (js/appmode.js) needs from the builder
+  RB.app = {
+    get state() { return S; },
+    loadState, toast, refresh: () => { refresh(); renderTab(); }, renderHeader,
+    setTab: (t) => { tab = t; renderTabs(); renderTab(); },
+    wallSrc, wallOrig, clone,
+    setDistro: (d) => { S.distro = d; renderHeader(); refresh(); renderTab(); },
+  };
   document.addEventListener('DOMContentLoaded', init);
 })((window.RB = window.RB || {}));

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Rice Cooker
+GenericName=Desktop Rice Builder
+Comment=Cook KDE Plasma rices and switch between them
+Exec=rice-cooker
+Icon=io.github.jpcass07.RiceCooker
+Terminal=false
+Categories=Settings;DesktopSettings;Qt;KDE;
+Keywords=rice;theme;kde;plasma;wallpaper;colour;color;panel;unixporn;
+StartupNotify=true

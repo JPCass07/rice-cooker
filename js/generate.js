@@ -165,14 +165,21 @@ echo "Restored. Log out and back in to reset colours in apps that were already o
     if ((s.icons === 'tela')) pk.push('git');
     const uniq = [...new Set(pk)];
     const pc = [];
-    if (uniq.length) pc.push(d.install(uniq));
+    if (uniq.length) {
+      // only ask for a password when something is actually missing
+      pc.push(
+        'missing=()',
+        `for p in ${uniq.join(' ')}; do ${d.has} "$p" >/dev/null 2>&1 || missing+=("$p"); done`,
+        `if [ \${#missing[@]} -gt 0 ]; then ${d.installMissing} "\${missing[@]}"; else echo "All packages are already installed."; fi`,
+      );
+    }
     if (aurPk.length) {
       const list = aurPk.join(' ');
       pc.push(
         'if command -v paru >/dev/null; then',
-        `  paru -S --needed --noconfirm ${list}`,
+        `  paru -S --needed --noconfirm \${RC_SUDOFLAGS:+--sudoflags "$RC_SUDOFLAGS"} ${list}`,
         'elif command -v yay >/dev/null; then',
-        `  yay -S --needed --noconfirm ${list}`,
+        `  yay -S --needed --noconfirm \${RC_SUDOFLAGS:+--sudoflags "$RC_SUDOFLAGS"} ${list}`,
         'else',
         `  echo "No AUR helper (paru or yay) found, skipping: ${list}"`,
         'fi',
@@ -575,9 +582,10 @@ WantedBy=timers.target`),
     return { steps, skipped, name };
   }
 
-  function buildScript(s, did) {
+  function buildScript(s, did, opts = {}) {
     const d = DISTROS[did];
-    const { steps, skipped } = buildSteps(s, did);
+    let { steps, skipped } = buildSteps(s, did);
+    if (opts.only) steps = steps.filter((st) => opts.only.includes(st.id));
     const ids = d.osIds.map((x) => `*" ${x} "*`).join('|');
     let out = `#!/usr/bin/env bash
 # =====================================================================
@@ -586,6 +594,8 @@ WantedBy=timers.target`),
 #  Add -y to skip the question. Everything it changes is backed up first.
 # =====================================================================
 set -uo pipefail
+# No terminal (run from the Rice Cooker app): ask for the sudo password with a dialog.
+if [ ! -t 0 ] && [ -n "\${SUDO_ASKPASS:-}" ]; then sudo() { command sudo -A "$@"; }; RC_SUDOFLAGS=-A; fi
 warn() { printf '\\033[1;33m!!\\033[0m %s\\n' "$*" >&2; }
 trap 'warn "line $LINENO failed: $BASH_COMMAND (continuing)"' ERR
 step() { printf '\\n\\033[1;36m==> %s\\033[0m\\n' "$*"; }

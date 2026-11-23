@@ -4,6 +4,34 @@ Build a KDE Plasma 6 rice in your browser, preview it live, save it as a preset,
 
 **Use it:** <https://jpcass07.github.io/rice-cooker/> or open `index.html` from a download (no build step, no server needed).
 
+## Desktop app (Flatpak)
+
+Rice Cooker also comes as a desktop app that applies rices directly, instead of handing you a script.
+
+- **Unboxing** on first launch: it detects your distro, Plasma version and session, backs up your current desktop, and lets you pick a first rice.
+- **Cook it**: applies the rice on screen and shows a live log with progress. Packages are only installed if missing; when they are, your password is asked by a system dialog (kdialog, zenity or ksshaskpass) and goes straight to `sudo`.
+- **My rices**: save rices and switch between them with one click. Every switch is backed up, and any backup, including your original desktop, can be restored from the same tab.
+- Wallpapers are saved to `~/Pictures/Wallpapers/rice-cooker` for you; rices live in `~/.local/share/rice-cooker/rices`.
+
+Install the bundle from the [latest release](https://github.com/JPCass07/rice-cooker/releases/latest), or build it:
+
+```bash
+bash desktop/build-flatpak.sh
+flatpak install --user dist/rice-cooker.flatpak
+flatpak run io.github.jpcass07.RiceCooker
+```
+
+It runs on the GNOME runtime (`org.gnome.Platform//51`, from Flathub), which already has Python, GTK 4 and WebKit, so the bundle is under 400 kB and the build needs no SDK.
+
+**Not sandboxed, on purpose.** Changing your desktop means running `plasma-apply-*`, `kwriteconfig6` and package installs on the host, so the app has `--talk-name=org.freedesktop.Flatpak` and uses `flatpak-spawn --host`. It only runs the script it shows you. This permission is also why it can't go on Flathub.
+
+Run it without Flatpak (Debian needs `gir1.2-webkit-6.0`):
+
+```bash
+sudo apt install gir1.2-webkit-6.0 gir1.2-adw-1
+python3 desktop/rice-cooker.py
+```
+
 ## Presets
 
 - **Your favourites:** Serpantinum (KDE), after [ilyamiro's Serpantinum](https://github.com/ilyamiro/serpantinum), and Caelestia (KDE), after [Caelestia Shell](https://github.com/caelestia-dots/shell).
@@ -65,6 +93,8 @@ bash my-rice-debian.sh -y     # no question
 | `js/presets.js` | built-in presets and procedural sample wallpapers |
 | `js/preview.js` | mock desktop and animation previews |
 | `js/app.js` | UI |
+| `js/appmode.js` | desktop-app mode: unboxing, My rices, cooking log, restore |
+| `desktop/` | the GTK 4 + WebKit app, Flatpak build script, launcher, icon, AppStream metadata |
 | `research/` | reference rices, projects and config keys |
 
 Third-party projects linked from the app belong to their authors; check each licence. Colour values of the classic schemes come from their public palettes.

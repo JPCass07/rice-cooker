@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.jpcass07.RiceCooker</id>
+  <name>Rice Cooker</name>
+  <summary>Cook KDE Plasma rices and switch between them</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <developer id="io.github.jpcass07"><name>JPCass07</name></developer>
+  <description>
+    <p>Build a KDE Plasma 6 rice with a live preview: colours from your wallpaper, KWin animations, panel layouts such as the Caelestia and Serpantinum top dock, icons, cursors and fonts. Then cook it onto your desktop in one click and switch between the rices you save.</p>
+    <p>Every change is backed up first and can be restored. Rice Cooker runs commands on your computer to change the desktop, so it is not sandboxed.</p>
+  </description>
+  <launchable type="desktop-id">io.github.jpcass07.RiceCooker.desktop</launchable>
+  <url type="homepage">https://jpcass07.github.io/rice-cooker/</url>
+  <url type="vcs-browser">https://github.com/JPCass07/rice-cooker</url>
+  <content_rating type="oars-1.1"/>
+  <releases><release version="1.0.0" date="2026-11-23"/></releases>
+</component>
