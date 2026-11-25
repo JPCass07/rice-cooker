@@ -132,6 +132,8 @@
       bc.innerHTML = '14:32<small>Sunday 23 November</small>';
     } else if (bc) bc.remove();
     renderLibrary(s);
+    ['Blur Widgets', 'Rounded Widgets Floating', 'Translucent', 'Dock', 'Outline Accent'].forEach((n) => desk.classList.toggle('ps-' + n.split(' ')[0].toLowerCase(), s.panelStyle === n && s.panel !== 'keep'));
+    desk.classList.toggle('has-viz', !!s.extras.visualizer);
     let wc = desk.querySelector('.wcol');
     if (s.extras.widgetColumn) {
       if (!wc) { wc = el('div', 'wcol'); space.appendChild(wc); }
@@ -335,7 +337,8 @@
   const rcRing = (v, l) => `<span class="rc-ring"><i class="wl-ring" style="--v:${v}"><b>${v}%</b></i>${l}</span>`;
   const RC = {
     clock: () => '<div class="rc-clock">23:56<small>TUESDAY 24 NOVEMBER</small></div>',
-    greeting: () => '<div class="rc-card rc-greet"><b>Good evening</b><span>Tuesday 24 November</span><em>23:56</em></div>',
+    greeting: () => `<div class="rc-card rc-greet"><b>Good evening</b><span>Tuesday 24 November</span>${S && S.extras.weather ? `<span class="rc-wx">${S.extras.tempUnit === 'F' ? '41°F' : '5°C'} ☁ Cloudy, ${S.extras.weather.place}</span>` : ''}<em>23:56</em></div>`,
+    weather: () => `<div class="rc-card rc-weather"><span>${S && S.extras.weather ? S.extras.weather.place : 'Set a town in Extras'}</span><div><b>${S && S.extras.tempUnit === 'F' ? '41°' : '5°'}</b><em>☁</em></div><span class="rc-days">${['Wed', 'Thu', 'Fri', 'Sat'].map((d) => `<i>${d}<br>⛅<br>8° 3°</i>`).join('')}</span></div>`,
     nowplaying: () => '<div class="rc-card rc-music"><i class="art"></i><div><b>Everlong</b><span>Foo Fighters</span><span class="bar"><i style="width:42%"></i></span><span class="rc-ctl">⏮ ⏸ ⏭<span class="viz"><b></b><b></b><b></b><b></b><b></b></span></span></div></div>',
     rings: () => `<div class="rc-card rc-rings">${rcRing(29, 'CPU')}${rcRing(37, 'RAM')}${rcRing(14, 'GPU')}</div>`,
     cpu: () => `<div class="rc-card rc-rings">${rcRing(29, 'CPU')}</div>`,
@@ -344,9 +347,8 @@
     calendar: () => `<div class="rc-card rc-cal"><b>November 2026</b><span class="days">${Array.from({ length: 35 }, (_, i) => { const d = i - 5; return `<i class="${d === 24 ? 'on' : ''}">${d >= 1 && d <= 30 ? d : ''}</i>`; }).join('')}</span></div>`,
   };
   const WLOOK = {
-    digitalclock: RC.clock, greeting: RC.greeting, rings: RC.rings, gpu: RC.gpu,
+    digitalclock: RC.clock, greeting: RC.greeting, rings: RC.rings, gpu: RC.gpu, weather: RC.weather,
     analogclock: () => '<i class="wl-analog"></i>',
-    weather: () => `<div class="pw-weather"><b>Reading, GB</b><div class="pw-now">${T()} ☁</div><div class="pw-days">${['Tonight', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d) => `<span>${d}<i>☁</i></span>`).join('')}</div></div>`,
     mediacontroller: RC.nowplaying, cpu: RC.cpu, memory: RC.memory,
     net: () => '<div class="pw-mon"><b>Network</b><span class="eq">' + '<i></i>'.repeat(8) + '</span></div>',
     disk: () => ring('Disk Usage', 74, '<span>/</span><span>441 GB</span>'),

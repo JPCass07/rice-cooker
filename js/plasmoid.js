@@ -25,6 +25,10 @@
     <entry name="kind" type="String"><default>clock</default></entry>
     <entry name="clock24" type="Bool"><default>true</default></entry>
     <entry name="name" type="String"><default></default></entry>
+    <entry name="place" type="String"><default></default></entry>
+    <entry name="lat" type="Double"><default>0</default></entry>
+    <entry name="lon" type="Double"><default>0</default></entry>
+    <entry name="unit" type="String"><default>C</default></entry>
   </group>
 </kcfg>
 `;
@@ -58,6 +62,29 @@ PlasmoidItem {
     Timer { interval: 1000; running: true; repeat: true; onTriggered: root.now = new Date() }
     function hhmm() { return Qt.formatTime(root.now, Plasmoid.configuration.clock24 ? "HH:mm" : "h:mm AP") }
 
+    // ---- weather from Open-Meteo (free, no account); only when a place is set
+    readonly property bool hasPlace: Plasmoid.configuration.lat !== 0 || Plasmoid.configuration.lon !== 0
+    property var wx: null
+    function wxText(c) {
+        if (c === 0) return ["Clear", "☀"]; if (c <= 2) return ["Partly cloudy", "⛅"]; if (c === 3) return ["Cloudy", "☁"];
+        if (c <= 48) return ["Fog", "🌫"]; if (c <= 57) return ["Drizzle", "🌦"]; if (c <= 67) return ["Rain", "🌧"];
+        if (c <= 77) return ["Snow", "❄"]; if (c <= 82) return ["Showers", "🌦"]; if (c <= 86) return ["Snow showers", "🌨"]; return ["Thunder", "⛈"];
+    }
+    function fetchWeather() {
+        if (!root.hasPlace) return;
+        var f = Plasmoid.configuration.unit === "F" ? "&temperature_unit=fahrenheit" : "";
+        var x = new XMLHttpRequest();
+        x.onreadystatechange = function () {
+            if (x.readyState !== XMLHttpRequest.DONE || x.status !== 200) return;
+            try { root.wx = JSON.parse(x.responseText) } catch (e) {}
+        };
+        x.open("GET", "https://api.open-meteo.com/v1/forecast?latitude=" + Plasmoid.configuration.lat + "&longitude=" + Plasmoid.configuration.lon +
+               "&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&forecast_days=5&timezone=auto" + f);
+        x.send();
+    }
+    readonly property string wxNow: root.wx ? Math.round(root.wx.current.temperature_2m) + "°" + Plasmoid.configuration.unit + "  " + root.wxText(root.wx.current.weather_code)[1] + " " + root.wxText(root.wx.current.weather_code)[0] : ""
+    Timer { interval: 30 * 60 * 1000; running: root.hasPlace && (root.kind === "weather" || root.kind === "greeting"); repeat: true; triggeredOnStart: true; onTriggered: root.fetchWeather() }
+
     Mpris.Mpris2Model { id: mpris }
     readonly property var player: mpris.currentPlayer
     readonly property bool playing: (player?.playbackStatus ?? 0) === Mpris.PlaybackStatus.Playing
@@ -82,7 +109,7 @@ PlasmoidItem {
             id: ld
             anchors.fill: parent
             anchors.margins: root.kind === "dock" || root.kind === "clock" ? 0 : Kirigami.Units.gridUnit * 0.9
-            sourceComponent: ({ clock: clockC, greeting: greetC, nowplaying: musicC, rings: ringsC, cpu: oneRingC, memory: oneRingC, gpu: oneRingC, calendar: calC, dock: dockC })[root.kind] || clockC
+            sourceComponent: ({ clock: clockC, greeting: greetC, weather: weatherC, nowplaying: musicC, rings: ringsC, cpu: oneRingC, memory: oneRingC, gpu: oneRingC, calendar: calC, dock: dockC })[root.kind] || clockC
         }
 
         // ---- top-dock pill: clock, date, now playing with a little visualiser
@@ -123,8 +150,39 @@ PlasmoidItem {
                 spacing: Kirigami.Units.smallSpacing
                 Text { text: (root.now.getHours() < 12 ? "Good morning" : root.now.getHours() < 18 ? "Good afternoon" : "Good evening") + (Plasmoid.configuration.name ? ", " + Plasmoid.configuration.name : ""); color: root.fg; font.bold: true; font.pixelSize: Kirigami.Units.gridUnit * 0.95; elide: Text.ElideRight; Layout.fillWidth: true }
                 Text { text: Qt.formatDate(root.now, "dddd d MMMM"); color: root.dim; font.pixelSize: Kirigami.Units.gridUnit * 0.7 }
+                Text { visible: root.wxNow !== ""; text: root.wxNow + (Plasmoid.configuration.place ? ", " + Plasmoid.configuration.place : ""); color: root.fg; font.pixelSize: Kirigami.Units.gridUnit * 0.7; elide: Text.ElideRight; Layout.fillWidth: true }
                 Item { Layout.fillHeight: true }
                 Text { text: root.hhmm(); color: root.accent; font.bold: true; font.pixelSize: Kirigami.Units.gridUnit * 1.8 }
+            }
+        }
+
+        // ---- weather: now, and the next days
+        Component {
+            id: weatherC
+            ColumnLayout {
+                spacing: Kirigami.Units.smallSpacing
+                Text { text: Plasmoid.configuration.place || "Set a town in Rice Cooker"; color: root.dim; font.pixelSize: Kirigami.Units.gridUnit * 0.65; elide: Text.ElideRight; Layout.fillWidth: true }
+                RowLayout {
+                    Text { text: root.wx ? Math.round(root.wx.current.temperature_2m) + "°" : "–"; color: root.fg; font.bold: true; font.pixelSize: Kirigami.Units.gridUnit * 2 }
+                    ColumnLayout {
+                        spacing: 0
+                        Text { text: root.wx ? root.wxText(root.wx.current.weather_code)[1] : ""; color: root.accent; font.pixelSize: Kirigami.Units.gridUnit * 1.1 }
+                        Text { text: root.wx ? root.wxText(root.wx.current.weather_code)[0] : ""; color: root.dim; font.pixelSize: Kirigami.Units.gridUnit * 0.6 }
+                    }
+                }
+                Item { Layout.fillHeight: true }
+                RowLayout {
+                    Layout.fillWidth: true
+                    Repeater {
+                        model: root.wx ? 4 : 0
+                        ColumnLayout {
+                            Layout.fillWidth: true; spacing: 0
+                            Text { Layout.alignment: Qt.AlignHCenter; text: Qt.formatDate(new Date(root.wx.daily.time[index + 1] + "T12:00"), "ddd"); color: root.dim; font.pixelSize: Kirigami.Units.gridUnit * 0.55 }
+                            Text { Layout.alignment: Qt.AlignHCenter; text: root.wxText(root.wx.daily.weather_code[index + 1])[1]; color: root.fg; font.pixelSize: Kirigami.Units.gridUnit * 0.75 }
+                            Text { Layout.alignment: Qt.AlignHCenter; text: Math.round(root.wx.daily.temperature_2m_max[index + 1]) + "° " + Math.round(root.wx.daily.temperature_2m_min[index + 1]) + "°"; color: root.dim; font.pixelSize: Kirigami.Units.gridUnit * 0.5 }
+                        }
+                    }
+                }
             }
         }
 

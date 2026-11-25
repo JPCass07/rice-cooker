@@ -185,6 +185,19 @@
 .rc-clock { font: 700 6cqi/1 var(--ui-font), sans-serif; color: var(--p-fg); text-align: center; text-shadow: 0 .3cqi 1.2cqi rgba(0,0,0,.35); }
 .rc-clock small { display: block; font-size: 1.1cqi; color: var(--p-dim); letter-spacing: .2cqi; font-weight: 500; margin-top: .5cqi; }
 
+/* panel styles (Panel Colorizer presets, approximated) */
+.desk.ps-blur .pnl { background: color-mix(in srgb, var(--p-bg2) 35%, transparent); backdrop-filter: blur(1.2cqi); }
+.desk.ps-blur .pnl > *:not(.sp):not(.sep), .desk.ps-rounded .pnl > *:not(.sp) { background: color-mix(in srgb, var(--p-surface) 85%, transparent); border-radius: 99px; padding: .3cqi .8cqi; }
+.desk.ps-rounded .pnl { background: transparent; border-color: transparent; }
+.desk.ps-translucent .pnl { background: color-mix(in srgb, var(--p-bg2) 25%, transparent); }
+.desk.ps-dock .pnl { background: color-mix(in srgb, var(--p-bg2) 40%, transparent); backdrop-filter: blur(1.6cqi) saturate(1.4); }
+.desk.ps-outline .pnl { background: color-mix(in srgb, var(--p-bg2) 85%, transparent); border: 1px solid var(--p-accent) !important; }
+.desk:not(.has-viz) .tdock .np .viz { display: none; }
+.rc-wx { color: var(--p-fg) !important; }
+.rc-weather { flex-direction: column; } .rc-weather > div { display: flex; align-items: center; gap: .6cqi; }
+.rc-weather b { font-size: 2.6cqi; } .rc-weather em { font-style: normal; color: var(--p-accent); font-size: 1.8cqi; }
+.rc-days { display: flex; justify-content: space-between; font-size: .7cqi; text-align: center; } .rc-days i { font-style: normal; }
+
 /* windows */
 .win {
   position: absolute; border-radius: var(--rad); overflow: hidden; z-index: 3;

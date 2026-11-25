@@ -590,6 +590,10 @@
       grid.appendChild(b);
     });
     g.appendChild(grid);
+    if (S.panel !== 'keep') {
+      g.appendChild(selectRow('Panel style', 'panelStyle', () => S.panelStyle || 'plasma', (v) => { S.panelStyle = v; }, 'Uses a preset from Panel Colorizer by luisbocanegra; it follows the rice\'s colours.'));
+      if (['topdock', 'serpantinum'].includes(S.panel)) g.appendChild(toggleRow('Real audio visualiser next to the top dock (Kurve + CAVA)', () => S.extras.visualizer, (v) => { S.extras.visualizer = v; }, 'visualizer'));
+    }
     const h = document.createElement('p');
     h.className = 'hint';
     h.innerHTML = 'Any layout other than "Leave my panels alone" removes your current panels and builds new ones on the primary screen. The script backs up the old layout first, and <code>undo.sh</code> puts it back.';
@@ -653,6 +657,24 @@
       wl.appendChild(b);
     });
     g.appendChild(wl);
+    const wp = document.createElement('div');
+    wp.className = 'row';
+    wp.style.marginTop = '12px';
+    const cur = S.extras.weather;
+    wp.innerHTML = `<div class="lab">Weather town</div><div class="url-row" style="margin:0"><input type="text" placeholder="e.g. Reading" value="${esc(cur ? cur.place : '')}" aria-label="Weather town"><button class="btn small" type="button">Find</button></div><div class="hint" style="margin:0">${cur ? `Using ${esc(cur.place)}.` : 'For the weather card and the greeting.'} Looked up with Open-Meteo (free, no account); the widget asks Open-Meteo for the forecast every 30 minutes.</div>`;
+    wp.querySelector('button').onclick = async () => {
+      const q = wp.querySelector('input').value.trim();
+      if (!q) { S.extras.weather = null; refresh(); renderTab(); return; }
+      try {
+        const r = await fetch(`https://geocoding-api.open-meteo.com/v1/search?count=1&name=${encodeURIComponent(q)}`).then((x) => x.json());
+        const h0 = r.results && r.results[0];
+        if (!h0) return toast(`Couldn't find ${q}`);
+        S.extras.weather = { place: [h0.name, h0.admin1, h0.country_code].filter(Boolean).join(', '), lat: +h0.latitude.toFixed(3), lon: +h0.longitude.toFixed(3) };
+        toast(`Weather set to ${S.extras.weather.place}`);
+        refresh(); renderTab();
+      } catch (e) { toast('Could not reach Open-Meteo'); }
+    };
+    g.appendChild(wp);
     const tu = document.createElement('div');
     tu.className = 'row';
     tu.style.marginTop = '12px';
@@ -661,7 +683,7 @@
     g.appendChild(tu);
     const wh = document.createElement('p');
     wh.className = 'hint';
-    wh.innerHTML = 'Plasma desktop widgets. Drag them on the preview to place them; the script puts them in the same spots. On your desktop, right-click > Enter Edit Mode to move or resize them any time.' + ((S.extras.widgets || []).includes('weather') ? compatNote('addonWidgets') : '');
+    wh.innerHTML = 'Plasma desktop widgets. Drag them on the preview to place them; the script puts them in the same spots. On your desktop, right-click > Enter Edit Mode to move or resize them any time.';
     g.appendChild(wh);
     body.appendChild(g);
 

@@ -125,8 +125,13 @@
       pkgs: { debian: null, ubuntu: null, fedora: null, arch: { aur: 'kwin-effects-better-blur-dx' }, opensuse: null },
       why: 'only packaged in the AUR; other distros must build it by hand from its GitHub page',
     },
+    visualizer: {
+      label: 'Audio visualiser (Kurve by luisbocanegra, powered by CAVA)',
+      pkgs: { debian: 'cava', ubuntu: 'cava', fedora: 'cava', arch: 'cava', opensuse: 'cava' },
+      note: 'Kurve itself is downloaded from its GitHub releases (GPL-3.0).',
+    },
     panelColorizer: {
-      label: 'Panel Colorizer widget (per-widget panel colours, islands)',
+      label: 'Panel Colorizer by luisbocanegra (panel styles: blur, islands, outlines)',
       pkgs: { debian: { manual: true }, ubuntu: { manual: true }, fedora: { manual: true }, arch: { aur: 'plasma6-applets-panel-colorizer', manual: true }, opensuse: { manual: true } },
     },
     shakeCursor: { label: 'Shake cursor to find it', builtin: true, minPlasma: '6.2' },
@@ -291,6 +296,14 @@
       { id: 'unity', label: 'Side launcher + top bar', hint: 'Unity-like' },
       { id: 'minimal', label: 'Thin top bar only', hint: 'tiling-WM look' },
     ],
+    panelStyle: [
+      { id: 'plasma', label: 'Plasma (your Plasma style decides)' },
+      { id: 'Blur Widgets', label: 'Blur: frosted panel, each widget its own pill', feature: 'panelColorizer' },
+      { id: 'Rounded Widgets Floating', label: 'Islands: rounded floating widgets', feature: 'panelColorizer' },
+      { id: 'Translucent', label: 'Translucent: see-through panel', feature: 'panelColorizer' },
+      { id: 'Dock', label: 'Dock: soft glass dock', feature: 'panelColorizer' },
+      { id: 'Outline Accent', label: 'Outline: thin accent border', feature: 'panelColorizer' },
+    ],
     loginStyle: [
       { id: 'blur', label: 'Blur: blurred wallpaper, clock and login card' },
       { id: 'clean', label: 'Clean: just the wallpaper; the card appears when you type' },
@@ -325,10 +338,11 @@
     if (s.colors.kitty) add('kitty', 'kitty theme');
     if (s.extras.roundedCorners) add('roundedCorners', 'Rounded corners');
     if (s.extras.betterBlur) add('betterBlur', 'Better Blur');
-    if (s.extras.panelColorizer) add('panelColorizer', 'Panel Colorizer');
+    if (s.extras.panelColorizer || (s.panelStyle && s.panelStyle !== 'plasma' && s.panel !== 'keep')) add('panelColorizer', 'Panel style');
+    if (s.extras.visualizer) add('visualizer', 'Audio visualiser');
     if (s.extras.termExtras) add('termExtras', 'Terminal extras');
     if (s.extras.bigClock) add('bigClock', 'Desktop clock');
-    if ((s.extras.widgets || []).includes('weather')) add('addonWidgets', 'Weather widget');
+
     if (s.login && (s.login.mode === 'rice' || s.login.mode === 'breeze')) add('sddm', 'Login screen');
     if (s.login && s.login.mode === 'cooker') add('cookerLogin', 'Login screen');
     if (s.login && s.login.mode === 'rice' && s.login.blur && s.login.wallpaper !== false) add('imagemagick', 'Blurred login background');
@@ -350,7 +364,7 @@
     { id: 'calendar', name: 'Calendar', plasmoid: 'io.github.jpcass07.ricecooker', kind: 'calendar', size: [300, 260] },
     // stock Plasma widgets
     { id: 'analogclock', name: 'Analog clock', plasmoid: 'org.kde.plasma.analogclock', size: [200, 200] },
-    { id: 'weather', name: 'Weather', plasmoid: 'org.kde.plasma.weather', size: [300, 160] },
+    { id: 'weather', name: 'Weather', plasmoid: 'io.github.jpcass07.ricecooker', kind: 'weather', size: [320, 170] },
     { id: 'net', name: 'Network speed', plasmoid: 'org.kde.plasma.systemmonitor.net', size: [260, 160] },
     { id: 'disk', name: 'Disk usage', plasmoid: 'org.kde.plasma.systemmonitor.diskusage', size: [220, 160] },
     { id: 'notes', name: 'Sticky note', plasmoid: 'org.kde.plasma.notes', size: [240, 220] },

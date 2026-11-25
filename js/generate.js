@@ -49,8 +49,11 @@
       pager: '"org.kde.plasma.pager"', sep: '"org.kde.plasma.marginsseparator"', desk: '"org.kde.plasma.showdesktop"',
       gmenu: '"org.kde.plasma.appmenu"', media: '"org.kde.plasma.mediacontroller"',
       rcdock: '["io.github.jpcass07.ricecooker", {General: {kind: "dock"}}]',
+      viz: '["luisbocanegra.audio.visualizer", {General: {roundedBars: true, barCount: 16, hideWhenIdle: true, barWidth: 3, barGap: 2}}]',
     };
-    const P = (o) => `makePanel(${JSON.stringify(Object.assign({}, o, { widgets: undefined }))}, [${o.widgets.map((w) => W[w]).join(', ')}]);`;
+    // the visualiser sits right after the top-dock pill
+    const withViz = (ws) => (s.extras.visualizer ? ws.flatMap((w) => (w === 'rcdock' ? ['rcdock', 'viz'] : [w])) : ws);
+    const P = (o) => `makePanel(${JSON.stringify(Object.assign({}, o, { widgets: undefined }))}, [${withViz(o.widgets).map((w) => W[w]).join(', ')}]);`;
     const layouts = {
       'topbar-dock': [
         P({ location: 'top', height: 30, lengthMode: 'fill', floating: false, widgets: ['menu', 'gmenu', 'spacer', 'clock', 'spacer', 'tray'] }),
@@ -100,6 +103,14 @@ function makePanel(o, widgets) {
       }
       if (w.reloadConfig) w.reloadConfig();
     }
+  }
+  // Panel Colorizer style, read by the shell script from the installed preset
+  if (typeof PC_CFG !== "undefined" && PC_CFG && knownWidgetTypes.indexOf("luisbocanegra.panel.colorizer") >= 0) {
+    var pc = p.addWidget("luisbocanegra.panel.colorizer");
+    pc.currentConfigGroup = ["General"];
+    pc.writeConfig("globalSettings", PC_CFG);
+    pc.writeConfig("hideWidget", true);
+    if (pc.reloadConfig) pc.reloadConfig();
   }
   return p;
 }
@@ -392,6 +403,27 @@ Parent=FALLBACK/`),
       step('animations', 'Animations and KWin effects', c, note);
     }
 
+    /* third-party widgets by luisbocanegra, from their GitHub releases: Panel Colorizer and Kurve */
+    {
+      const want = [];
+      if (has('panelColorizer') && compat('panelColorizer', did, { aur }).how !== 'aur') want.push(['luisbocanegra/plasma-panel-colorizer', 'Panel Colorizer']);
+      if (has('visualizer')) want.push(['luisbocanegra/kurve', 'Kurve']);
+      if (want.length) {
+        const c = [];
+        want.forEach(([repo, label]) => c.push(
+          `url=$(curl -fsSL https://api.github.com/repos/${repo}/releases/latest | grep -o '"browser_download_url": *"[^"]*\\.plasmoid"' | head -n1 | cut -d'"' -f4)`,
+          'if [ -n "$url" ]; then',
+          '  tmp=$(mktemp -d) && curl -fL -o "$tmp/w.plasmoid" "$url"',
+          '  kpackagetool6 -t Plasma/Applet -u "$tmp/w.plasmoid" >/dev/null 2>&1 || kpackagetool6 -t Plasma/Applet -i "$tmp/w.plasmoid"',
+          '  rm -rf "$tmp"',
+          'else',
+          `  echo "Could not download ${label}; get it from System Settings > Get New Widgets"`,
+          'fi',
+        ));
+        step('addons', `Install ${want.map((w) => w[1]).join(' and ')}`, c, 'GPL-3.0 widgets by luisbocanegra, installed into your home folder.');
+      }
+    }
+
     /* Rice Cooker's own Plasma widget: the cards and the top-dock pill */
     {
       const P = RB.plasmoid;
@@ -413,6 +445,16 @@ Parent=FALLBACK/`),
     if (s.panel !== 'keep') {
       step('panels', 'Panel layout', [
         `RB_PANEL_JS=$(cat <<'JS_EOF'\n${panelJS(s.panel, s)}\nJS_EOF\n)`,
+        ...(s.panelStyle && s.panelStyle !== 'plasma' && has('panelColorizer') ? [
+          '# the panel style comes from one of Panel Colorizer\'s own presets',
+          `for d in "$HOME/.local/share/plasma/plasmoids" /usr/share/plasma/plasmoids; do PRESET="$d/luisbocanegra.panel.colorizer/contents/ui/presets/${s.panelStyle}/settings.json"; [ -f "$PRESET" ] && break; done`,
+          'if [ -f "$PRESET" ]; then',
+          '  PC_CFG=$(python3 -c \'import json,sys; print(json.dumps(json.dumps(json.load(open(sys.argv[1]))["globalSettings"])))\' "$PRESET")',
+          '  RB_PANEL_JS="var PC_CFG = $PC_CFG;"$\'\\n\'"$RB_PANEL_JS"',
+          'else',
+          `  echo "Panel Colorizer preset '${s.panelStyle}' not found; panels keep the Plasma style"`,
+          'fi',
+        ] : []),
         Q,
         '"$Q" org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript "$RB_PANEL_JS"',
       ], 'Removes your current panels and builds the new layout on the primary screen. The backup step saved the old layout.');
@@ -435,18 +477,6 @@ Parent=FALLBACK/`),
       }
       c.push(kw('kwinrc', 'Plugins', 'kwin4_effect_shapecornersEnabled', 'true'), Q, '"$Q" org.kde.KWin /KWin reconfigure');
       step('rounded', 'Rounded corners', c, FEATURES.roundedCorners.note + (how.how === 'aur' ? ' (installed from the AUR in the packages step)' : ''));
-    }
-    if (has('panelColorizer') && compat('panelColorizer', did, { aur }).how !== 'aur') {
-      step('colorizer', 'Panel Colorizer widget', [
-        'url=$(curl -fsSL https://api.github.com/repos/luisbocanegra/plasma-panel-colorizer/releases/latest | grep -o \'"browser_download_url": *"[^"]*\\.plasmoid"\' | head -n1 | cut -d\'"\' -f4)',
-        'if [ -n "$url" ]; then',
-        '  tmp=$(mktemp -d) && curl -fL -o "$tmp/colorizer.plasmoid" "$url"',
-        '  kpackagetool6 -t Plasma/Applet -i "$tmp/colorizer.plasmoid" || kpackagetool6 -t Plasma/Applet -u "$tmp/colorizer.plasmoid"',
-        '  rm -rf "$tmp"',
-        'else',
-        '  echo "Could not find the Panel Colorizer download; get it from System Settings > Get New Widgets"',
-        'fi',
-      ], 'Add it to a panel with right-click > Add Widgets > Panel Colorizer.');
     }
     if (has('betterBlur')) {
       step('betterblur', 'Better Blur DX', ['echo "Better Blur DX was installed from the AUR: enable it in System Settings > Desktop Effects (turn off the stock Blur)."']);
@@ -575,7 +605,6 @@ QML_EOF`,
       }
       const pos = s.extras.widgetPos || {};
       (s.extras.widgets || []).map((id) => RB.catalog.WIDGETS.find((w) => w.id === id)).filter(Boolean)
-        .filter((w) => w.id !== 'weather' || has('addonWidgets'))
         .filter((w) => !(w.kind && colIds.includes(w.kind)))       // already in the column
         .filter((w) => !(w.id === 'digitalclock' && has('bigClock')))
         .forEach((w, i) => { const pp = pos[w.id] || [3 + (i % 4) * 12, 8 + Math.floor(i / 4) * 16]; items.push([w.plasmoid, pp[0], pp[1], w.size[0], w.size[1], 'lib', w.kind || '']); });
@@ -604,7 +633,16 @@ for (var i = 0; i < ds.length; i++) {
     var w = ds[i].addWidget(it[0], x, y, it[3], it[4]);
     w.currentConfigGroup = ["RiceCooker"];
     w.writeConfig("added", "yes");
-    if (it[6]) { w.currentConfigGroup = ["General"]; w.writeConfig("kind", it[6]); w.writeConfig("clock24", true); if (w.reloadConfig) w.reloadConfig(); }
+    if (it[6]) {
+      w.currentConfigGroup = ["General"];
+      w.writeConfig("kind", it[6]);
+      w.writeConfig("clock24", true);
+      w.writeConfig("unit", "${s.extras.tempUnit === 'F' ? 'F' : 'C'}");${s.extras.weather && s.extras.weather.lat ? `
+      w.writeConfig("place", ${JSON.stringify(s.extras.weather.place || '')});
+      w.writeConfig("lat", ${Number(s.extras.weather.lat)});
+      w.writeConfig("lon", ${Number(s.extras.weather.lon)});` : ''}
+      if (w.reloadConfig) w.reloadConfig();
+    }
     if (it[0] === "org.kde.plasma.digitalclock") {
       w.currentConfigGroup = ["Appearance"];
       w.writeConfig("showDate", true);
