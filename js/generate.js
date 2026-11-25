@@ -138,6 +138,8 @@ ${layouts[layout].join('\n')}`;
       'done',
       heredoc('$BACKUP/undo.sh', `#!/usr/bin/env bash
 # Restores the KDE config files Rice Cooker saved in this folder.
+# No terminal (restored from the app): ask for the sudo password with a dialog.
+if [ ! -t 0 ] && [ -n "\${SUDO_ASKPASS:-}" ]; then sudo() { command sudo -A "$@"; }; fi
 cd "$(dirname "$0")" || exit 1
 systemctl --user stop plasma-plasmashell.service
 find . -type f ! -name undo.sh -printf '%P\\n' | while read -r f; do
@@ -466,7 +468,7 @@ QML_EOF`,
         '  sudo install -d /etc/sddm.conf.d',
         `  printf '%s\n' ${conf.map(sq).join(' ')} | sudo tee /etc/sddm.conf.d/zz-rice-cooker.conf >/dev/null`,
         '  if [ -n "${BACKUP:-}" ] && [ -f "$BACKUP/undo.sh" ]; then',
-        `    printf '%s\n' '# login screen' 'sudo rm -f /etc/sddm.conf.d/zz-rice-cooker.conf' 'echo "Login screen restored."' >> "$BACKUP/undo.sh"`,
+        `    printf '%s\n' '# login screen' 'if sudo rm -f /etc/sddm.conf.d/zz-rice-cooker.conf; then echo "Login screen restored."; else echo "Login screen NOT restored: run  sudo rm -f /etc/sddm.conf.d/zz-rice-cooker.conf"; fi' >> "$BACKUP/undo.sh"`,
         '  fi',
         '  echo "Login screen set. Try it now with: sddm-greeter-qt6 --test-mode --theme $TD"',
         'fi',
@@ -530,9 +532,9 @@ QML_EOF`,
         '  if [ -n "${BACKUP:-}" ] && [ -f "$BACKUP/undo.sh" ]; then',
         `    cat >> "$BACKUP/undo.sh" <<'LOGIN_EOF'`,
         '# login screen',
-        'sudo rm -f /etc/sddm.conf.d/zz-rice-cooker.conf',
-        'if [ -f /usr/share/sddm/themes/breeze/theme.conf.user.rice-cooker-orig ]; then sudo cp -a /usr/share/sddm/themes/breeze/theme.conf.user.rice-cooker-orig /usr/share/sddm/themes/breeze/theme.conf.user; else sudo rm -f /usr/share/sddm/themes/breeze/theme.conf.user; fi',
-        'echo "Login screen restored."',
+        'ok=1; sudo rm -f /etc/sddm.conf.d/zz-rice-cooker.conf || ok=0',
+        'if [ -f /usr/share/sddm/themes/breeze/theme.conf.user.rice-cooker-orig ]; then sudo cp -a /usr/share/sddm/themes/breeze/theme.conf.user.rice-cooker-orig /usr/share/sddm/themes/breeze/theme.conf.user || ok=0; else sudo rm -f /usr/share/sddm/themes/breeze/theme.conf.user || ok=0; fi',
+        '[ "$ok" = 1 ] && echo "Login screen restored." || echo "Login screen NOT restored: run this undo.sh again from a terminal so sudo can ask for your password."',
         'LOGIN_EOF',
         '  fi',
         '  echo "Login screen set. You will see it the next time you log out or restart."',
