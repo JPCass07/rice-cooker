@@ -141,7 +141,7 @@
     anim: { switcher: 'thumbnail_grid', openClose: 'scale', minimize: 'magiclamp', desktopSwitch: 'slide', speed: 1, wobbly: false, blur: true, blurStrength: 8, blurNoise: 0, translucency: false, dimInactive: false, slidingPopups: true, cube: false, shakeCursor: false },
     panel: 'keep',
     login: { mode: 'keep', wallpaper: true, sync: true, clock: true },
-    extras: { roundedCorners: false, betterBlur: false, panelColorizer: false, termExtras: false, bigClock: false, serpKde: false, widgetColumn: false, widgets: [], widgetPos: {} },
+    extras: { roundedCorners: false, betterBlur: false, panelColorizer: false, termExtras: false, bigClock: false, serpKde: false, widgetColumn: false, widgets: [], widgetPos: {}, tempUnit: 'C' },
     wallpapers: [], activeWallpaper: 0,
     cycle: { enabled: false, interval: 'off', order: 'next' },
   });

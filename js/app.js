@@ -653,6 +653,12 @@
       wl.appendChild(b);
     });
     g.appendChild(wl);
+    const tu = document.createElement('div');
+    tu.className = 'row';
+    tu.style.marginTop = '12px';
+    tu.innerHTML = `<div class="lab">Weather units</div><div class="seg small">${['C', 'F'].map((u) => `<button type="button" data-u="${u}" aria-pressed="${(S.extras.tempUnit || 'C') === u}">°${u}</button>`).join('')}</div>`;
+    tu.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => { S.extras.tempUnit = b.dataset.u; refresh(); renderTab(); }));
+    g.appendChild(tu);
     const wh = document.createElement('p');
     wh.className = 'hint';
     wh.innerHTML = 'Plasma desktop widgets. Drag them on the preview to place them; the script puts them in the same spots. On your desktop, right-click > Enter Edit Mode to move or resize them any time.' + ((S.extras.widgets || []).includes('weather') ? compatNote('addonWidgets') : '');

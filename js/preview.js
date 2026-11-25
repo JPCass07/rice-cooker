@@ -135,10 +135,7 @@
     let wc = desk.querySelector('.wcol');
     if (s.extras.widgetColumn) {
       if (!wc) { wc = el('div', 'wcol'); space.appendChild(wc); }
-      wc.innerHTML = `<div class="wc"><b>Good morning</b><span>☁ 9°C, Reading</span></div>
-        <div class="wc np2"><i class="art"></i><div><b>Everlong</b><span>Foo Fighters</span><span class="bar"><i style="width:42%"></i></span></div></div>
-        <div class="wc rings"><span><i style="--v:63"></i>CPU</span><span><i style="--v:41"></i>RAM</span><span><i style="--v:28"></i>GPU</span></div>
-        <div class="wc cal"><b>November</b><span class="days">${Array.from({ length: 28 }, (_, i) => `<i class="${i === 18 ? 'on' : ''}">${i + 1}</i>`).join('')}</span></div>`;
+      wc.innerHTML = ['weather', 'mediacontroller', 'cpu', 'memory', 'calendar'].map((id) => `<div class="wc pw">${WLOOK[id]()}</div>`).join('');
       term.style.left = '38%';
     } else { if (wc) wc.remove(); term.style.left = ''; }
   }
@@ -330,17 +327,27 @@
   }
 
   /* ---------- widget library: chosen desktop widgets, draggable like Plasma's Edit Mode ---------- */
+  // These mimic the stock Plasma widgets (what the script really adds), not custom cards
+  const T = () => (S && S.extras.tempUnit === 'F' ? '41 °F' : '5 °C');
+  const cal = () => `<div class="pw-cal"><div class="pw-head"><b>November</b><span>‹ Today ›</span></div><div class="pw-tabs"><u>Days</u><span>Months</span><span>Years</span></div><div class="pw-grid">${Array.from({ length: 35 }, (_, i) => { const d = i - 5; return `<i class="${d === 23 ? 'on' : d < 1 || d > 30 ? 'dim' : ''}">${d < 1 ? 26 + i : d > 30 ? d - 30 : d}</i>`; }).join('')}</div></div>`;
+  const ring = (label, v, rows) => `<div class="pw-mon"><b>${label}</b><i class="wl-ring" style="--v:${v}"></i><small>${v}%</small><div class="pw-rows">${rows}</div></div>`;
   const WLOOK = {
-    digitalclock: '<b class="wl-big">14:32</b><span>Sunday</span>', analogclock: '<i class="wl-analog"></i>',
-    weather: '<b>9°C</b><span>Cloudy</span>', mediacontroller: '<i class="art"></i><span>Everlong</span>',
-    cpu: '<i class="wl-ring" style="--v:63"></i><span>CPU</span>', memory: '<i class="wl-ring" style="--v:41"></i><span>RAM</span>',
-    net: '<span class="eq">' + '<i></i>'.repeat(8) + '</span><span>Network</span>', disk: '<i class="wl-ring" style="--v:74"></i><span>Disk</span>',
-    calendar: '<b>November</b><span>23</span>', notes: '<span>Notes</span><b>cook rice</b>', puzzle: '<b>15</b><span>Puzzle</span>',
+    digitalclock: () => '<div class="pw-clock">23:56<small>24/11/2026</small></div>',
+    analogclock: () => '<i class="wl-analog"></i>',
+    weather: () => `<div class="pw-weather"><b>Reading, GB</b><div class="pw-now">${T()} ☁</div><div class="pw-days">${['Tonight', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d) => `<span>${d}<i>☁</i></span>`).join('')}</div></div>`,
+    mediacontroller: () => '<div class="pw-media"><i class="pw-stop"></i><small>No media playing</small></div>',
+    cpu: () => ring('Total CPU Use', 5, '<span>Number of cores</span><span>12</span>'),
+    memory: () => ring('Memory Usage', 26, '<span>Used</span><span>4.1 GiB</span>'),
+    net: () => '<div class="pw-mon"><b>Network</b><span class="eq">' + '<i></i>'.repeat(8) + '</span></div>',
+    disk: () => ring('Disk Usage', 74, '<span>/</span><span>441 GB</span>'),
+    calendar: cal,
+    notes: () => '<div class="pw-note">cook rice</div>',
+    puzzle: () => '<b>15</b><span>Puzzle</span>',
   };
   function renderLibrary(s) {
     space.querySelectorAll('.wlib').forEach((x) => x.remove());
     (s.extras.widgets || []).forEach((id, i) => {
-      const w = el('div', 'wlib', WLOOK[id] || id);
+      const w = el('div', 'wlib pw', WLOOK[id] ? WLOOK[id]() : id);
       const pos = (s.extras.widgetPos || {})[id] || [3 + (i % 4) * 12, 8 + Math.floor(i / 4) * 16];
       w.style.left = pos[0] + '%'; w.style.top = pos[1] + '%';
       w.title = 'Drag me (in Plasma: right-click the desktop > Enter Edit Mode)';

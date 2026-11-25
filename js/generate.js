@@ -431,24 +431,6 @@ Parent=FALLBACK/`),
       step('betterblur', 'Better Blur DX', ['echo "Better Blur DX was installed from the AUR: enable it in System Settings > Desktop Effects (turn off the stock Blur)."']);
     }
 
-    if (has('bigClock')) {
-      step('bigclock', 'Big clock on the desktop', [
-        `RB_CLOCK_JS=$(cat <<'JS_EOF'
-var ds = desktops();
-for (var i = 0; i < ds.length; i++) {
-  if (ds[i].screen !== 0) continue;
-  var w = ds[i].addWidget("org.kde.plasma.digitalclock", Math.round(screenGeometry(0).width / 2) - 260, 140, 520, 220);
-  w.currentConfigGroup = ["Appearance"];
-  w.writeConfig("showDate", true);
-  w.writeConfig("dateDisplayFormat", "BelowTime");
-  w.writeConfig("autoFontAndSize", true);
-}
-JS_EOF
-)`,
-        Q,
-        '"$Q" org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript "$RB_CLOCK_JS"',
-      ], 'Adds a large Digital Clock widget to the desktop of the primary screen. Move or resize it in Edit Mode.');
-    }
     /* login screen (SDDM) */
     if (has('cookerLogin') && s.login && s.login.mode === 'cooker') {
       const L = s.login, T = RB.sddmTheme;
@@ -559,61 +541,70 @@ QML_EOF`,
       step('login', L.mode === 'breeze' ? 'Login screen: plain Breeze' : 'Login screen to match', c, FEATURES.sddm.note);
     }
 
-    /* widget library: add the chosen widgets where they sit in the preview */
-    const lib = (s.extras.widgets || []).map((id) => RB.catalog.WIDGETS.find((w) => w.id === id)).filter(Boolean)
-      .filter((w) => w.id !== 'weather' || has('addonWidgets'));
-    if (lib.length) {
+    /* desktop widgets: big clock, Caelestia column and the widget library, in one step.
+       Every widget Rice Cooker adds is tagged, and the next cook removes the tagged
+       ones first, so cooking again replaces them instead of stacking duplicates. */
+    {
+      const items = []; // [plasmoid, x, y, w, h, kind]  x/y: pixels if kind is 'col'/'clock', else % of the screen
+      if (has('bigClock')) items.push(['org.kde.plasma.digitalclock', 'center', 140, 520, 220, 'clock']);
+      const colIds = [];
+      if (has('widgetColumn')) {
+        [['org.kde.plasma.weather', 150], ['org.kde.plasma.mediacontroller', 170], ['org.kde.plasma.systemmonitor.cpu', 150],
+          ['org.kde.plasma.systemmonitor.memory', 150], ['org.kde.plasma.calendar', 260]].forEach(([id, h]) => { colIds.push(id); items.push([id, 'right', h, 320, h, 'col']); });
+      }
       const pos = s.extras.widgetPos || {};
-      const list = lib.map((w, i) => `  [${JSON.stringify(w.plasmoid)}, ${(pos[w.id] || [3 + (i % 4) * 12, 8 + Math.floor(i / 4) * 16]).join(', ')}, ${w.size.join(', ')}]`).join(',\n');
-      step('widgetlib', `Desktop widgets (${lib.length})`, [
-        `RB_LIB_JS=$(cat <<'JS_EOF'
-var g = screenGeometry(0);
-// [widget, x %, y %, width, height] - positions come from the Rice Cooker preview
-var lib = [
-${list}
+      (s.extras.widgets || []).map((id) => RB.catalog.WIDGETS.find((w) => w.id === id)).filter(Boolean)
+        .filter((w) => w.id !== 'weather' || has('addonWidgets'))
+        .filter((w) => !colIds.includes(w.plasmoid))               // already in the column
+        .filter((w) => !(w.id === 'digitalclock' && has('bigClock')))
+        .forEach((w, i) => { const pp = pos[w.id] || [3 + (i % 4) * 12, 8 + Math.floor(i / 4) * 16]; items.push([w.plasmoid, pp[0], pp[1], w.size[0], w.size[1], 'lib']); });
+      const unit = s.extras.tempUnit === 'F' ? 6002 : 6001; // KUnitConversion: Celsius 6001, Fahrenheit 6002
+      const js = `var g = screenGeometry(0);
+var items = [
+${items.map((x) => '  ' + JSON.stringify(x)).join(',\n')}
 ];
 var ds = desktops();
 for (var i = 0; i < ds.length; i++) {
   if (ds[i].screen !== 0) continue;
-  for (var k = 0; k < lib.length; k++) {
-    if (knownWidgetTypes.indexOf(lib[k][0]) < 0) { print("skipping " + lib[k][0] + ": not installed"); continue; }
-    ds[i].addWidget(lib[k][0], Math.round(g.width * lib[k][1] / 100), Math.round(g.height * lib[k][2] / 100), lib[k][3], lib[k][4]);
+  // take away what an earlier cook added
+  var old = ds[i].widgets();
+  for (var j = 0; j < old.length; j++) {
+    old[j].currentConfigGroup = ["RiceCooker"];
+    if (old[j].readConfig("added", "") === "yes") old[j].remove();
   }
-}
-JS_EOF
-)`,
-        Q,
-        '"$Q" org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript "$RB_LIB_JS"',
-      ], 'Puts each widget where you placed it in the preview. To move or resize them later: right-click the desktop > Enter Edit Mode, then drag.');
+  var colY = 70;
+  for (var k = 0; k < items.length; k++) {
+    var it = items[k];
+    if (knownWidgetTypes.indexOf(it[0]) < 0) { print("skipping " + it[0] + ": not installed"); continue; }
+    var x, y;
+    if (it[5] === "col") { x = g.width - 360; y = colY; colY += it[4] + 14; }
+    else if (it[5] === "clock") { x = Math.round(g.width / 2) - it[3] / 2; y = it[2]; }
+    else { x = Math.round(g.width * it[1] / 100); y = Math.round(g.height * it[2] / 100); }
+    var w = ds[i].addWidget(it[0], x, y, it[3], it[4]);
+    w.currentConfigGroup = ["RiceCooker"];
+    w.writeConfig("added", "yes");
+    if (it[0] === "org.kde.plasma.digitalclock") {
+      w.currentConfigGroup = ["Appearance"];
+      w.writeConfig("showDate", true);
+      w.writeConfig("dateDisplayFormat", "BelowTime");
+      w.writeConfig("autoFontAndSize", true);
+    }
+    if (it[0] === "org.kde.plasma.weather") {
+      w.currentConfigGroup = ["Units"];
+      w.writeConfig("temperatureUnit", ${unit});
+    }
+  }
+}`;
+      const removeOnly = !items.length; // switching to a rice without widgets still clears the old ones
+      if (items.length || removeOnly) {
+        step('deskwidgets', items.length ? `Desktop widgets (${items.length})` : 'Remove Rice Cooker desktop widgets', [
+          `RB_WIDGETS_JS=$(cat <<'JS_EOF'\n${js}\nJS_EOF\n)`,
+          Q,
+          '"$Q" org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript "$RB_WIDGETS_JS"',
+        ], 'Replaces any widgets an earlier cook added (they are tagged), so cooking again never stacks duplicates. Move or resize them any time: right-click the desktop > Enter Edit Mode. Set your town in the weather widget once (right-click > Configure).');
+      }
     }
 
-    if (has('widgetColumn')) {
-      step('widgets', 'Widget column on the desktop', [
-        `RB_WIDGETS_JS=$(cat <<'JS_EOF'
-var g = screenGeometry(0);
-var col = [
-  ["org.kde.plasma.weather", 150],
-  ["org.kde.plasma.mediacontroller", 170],
-  ["org.kde.plasma.systemmonitor.cpu", 150],
-  ["org.kde.plasma.systemmonitor.memory", 150],
-  ["org.kde.plasma.calendar", 260]
-];
-var ds = desktops();
-for (var i = 0; i < ds.length; i++) {
-  if (ds[i].screen !== 0) continue;
-  var y = 70;
-  for (var k = 0; k < col.length; k++) {
-    if (knownWidgetTypes.indexOf(col[k][0]) < 0) { print("skipping " + col[k][0] + ": not installed"); continue; }
-    ds[i].addWidget(col[k][0], g.width - 360, y, 320, col[k][1]);
-    y += col[k][1] + 14;
-  }
-}
-JS_EOF
-)`,
-        Q,
-        '"$Q" org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript "$RB_WIDGETS_JS"',
-      ], 'Stacks Plasma desktop widgets down the right edge of the primary screen, like the Caelestia dashboard column. Set your town in the weather widget once (right-click > Configure).');
-    }
     if (has('serpKde')) {
       step('serpkde', 'Serpantinum-KDE shell', [
         'mkdir -p "$HOME/.local/src"',

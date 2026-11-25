@@ -142,6 +142,30 @@
 .lg-pill i { width: 1px; height: 1.6cqi; background: color-mix(in srgb, var(--p-fg) 25%, transparent); }
 .lg-pill i.lg-av { width: 2.2cqi; height: 2.2cqi; border-radius: 50%; background: var(--p-accent); }
 
+/* stock Plasma widget look (what the script really adds) */
+.pw { align-items: stretch !important; gap: .4cqi; font-size: .85cqi; color: var(--p-fg); background: color-mix(in srgb, var(--p-bg2) 92%, transparent) !important; border-radius: .5cqi !important; padding: .7cqi .8cqi !important; }
+.pw b { font-weight: 500; font-size: .95cqi; }
+.pw small { color: var(--p-dim); font-size: .75cqi; }
+.pw-head, .pw-tabs, .pw-rows, .pw-days { display: flex; justify-content: space-between; gap: .4cqi; }
+.pw-head span { color: var(--p-dim); }
+.pw-tabs { color: var(--p-dim); font-size: .75cqi; }
+.pw-tabs u { text-decoration: none; color: var(--p-fg); border-bottom: 1px solid var(--p-accent); }
+.pw-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: .15cqi; text-align: center; font-size: .7cqi; }
+.pw-grid i { font-style: normal; } .pw-grid i.dim { color: var(--p-dim); opacity: .6; } .pw-grid i.on { background: color-mix(in srgb, var(--p-accent) 35%, transparent); border-radius: .2cqi; }
+.pw-now { font-size: 1.6cqi; font-weight: 600; }
+.pw-days span { display: flex; flex-direction: column; align-items: center; font-size: .65cqi; color: var(--p-dim); }
+.pw-days i { font-style: normal; color: var(--p-fg); font-size: 1cqi; }
+.pw-media { display: flex; flex-direction: column; align-items: center; gap: .5cqi; padding: .6cqi 0; }
+.pw-stop { width: 3.4cqi; height: 3.4cqi; border-radius: 50%; border: .35cqi solid var(--p-fg); position: relative; }
+.pw-stop::after { content: ''; position: absolute; inset: 30%; background: var(--p-fg); border-radius: .15cqi; }
+.pw-mon { display: flex; flex-direction: column; align-items: center; gap: .3cqi; }
+.pw-mon .pw-rows { width: 100%; font-size: .7cqi; color: var(--p-dim); }
+.pw-clock { font: 400 3.4cqi/1 var(--ui-font), sans-serif; text-align: center; }
+.pw-clock small { display: block; font-size: 1.6cqi; color: var(--p-fg); margin-top: .5cqi; }
+.pw-note { background: #f3e9a6; color: #333; padding: .8cqi; border-radius: .2cqi; min-height: 5cqi; }
+.pw-weather b { font-size: .85cqi; }
+.wcol { gap: .5cqi !important; }
+
 /* windows */
 .win {
   position: absolute; border-radius: var(--rad); overflow: hidden; z-index: 3;
