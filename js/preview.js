@@ -135,7 +135,7 @@
     let wc = desk.querySelector('.wcol');
     if (s.extras.widgetColumn) {
       if (!wc) { wc = el('div', 'wcol'); space.appendChild(wc); }
-      wc.innerHTML = ['weather', 'mediacontroller', 'cpu', 'memory', 'calendar'].map((id) => `<div class="wc pw">${WLOOK[id]()}</div>`).join('');
+      wc.innerHTML = ['greeting', 'nowplaying', 'rings', 'calendar'].map((k) => `<div class="wc rcw">${RC[k]()}</div>`).join('');
       term.style.left = '38%';
     } else { if (wc) wc.remove(); term.style.left = ''; }
   }
@@ -331,23 +331,34 @@
   const T = () => (S && S.extras.tempUnit === 'F' ? '41 °F' : '5 °C');
   const cal = () => `<div class="pw-cal"><div class="pw-head"><b>November</b><span>‹ Today ›</span></div><div class="pw-tabs"><u>Days</u><span>Months</span><span>Years</span></div><div class="pw-grid">${Array.from({ length: 35 }, (_, i) => { const d = i - 5; return `<i class="${d === 23 ? 'on' : d < 1 || d > 30 ? 'dim' : ''}">${d < 1 ? 26 + i : d > 30 ? d - 30 : d}</i>`; }).join('')}</div></div>`;
   const ring = (label, v, rows) => `<div class="pw-mon"><b>${label}</b><i class="wl-ring" style="--v:${v}"></i><small>${v}%</small><div class="pw-rows">${rows}</div></div>`;
+  // Rice Cooker cards: same layout as the widget the script installs (js/plasmoid.js)
+  const rcRing = (v, l) => `<span class="rc-ring"><i class="wl-ring" style="--v:${v}"><b>${v}%</b></i>${l}</span>`;
+  const RC = {
+    clock: () => '<div class="rc-clock">23:56<small>TUESDAY 24 NOVEMBER</small></div>',
+    greeting: () => '<div class="rc-card rc-greet"><b>Good evening</b><span>Tuesday 24 November</span><em>23:56</em></div>',
+    nowplaying: () => '<div class="rc-card rc-music"><i class="art"></i><div><b>Everlong</b><span>Foo Fighters</span><span class="bar"><i style="width:42%"></i></span><span class="rc-ctl">⏮ ⏸ ⏭<span class="viz"><b></b><b></b><b></b><b></b><b></b></span></span></div></div>',
+    rings: () => `<div class="rc-card rc-rings">${rcRing(29, 'CPU')}${rcRing(37, 'RAM')}${rcRing(14, 'GPU')}</div>`,
+    cpu: () => `<div class="rc-card rc-rings">${rcRing(29, 'CPU')}</div>`,
+    memory: () => `<div class="rc-card rc-rings">${rcRing(37, 'RAM')}</div>`,
+    gpu: () => `<div class="rc-card rc-rings">${rcRing(14, 'GPU')}</div>`,
+    calendar: () => `<div class="rc-card rc-cal"><b>November 2026</b><span class="days">${Array.from({ length: 35 }, (_, i) => { const d = i - 5; return `<i class="${d === 24 ? 'on' : ''}">${d >= 1 && d <= 30 ? d : ''}</i>`; }).join('')}</span></div>`,
+  };
   const WLOOK = {
-    digitalclock: () => '<div class="pw-clock">23:56<small>24/11/2026</small></div>',
+    digitalclock: RC.clock, greeting: RC.greeting, rings: RC.rings, gpu: RC.gpu,
     analogclock: () => '<i class="wl-analog"></i>',
     weather: () => `<div class="pw-weather"><b>Reading, GB</b><div class="pw-now">${T()} ☁</div><div class="pw-days">${['Tonight', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d) => `<span>${d}<i>☁</i></span>`).join('')}</div></div>`,
-    mediacontroller: () => '<div class="pw-media"><i class="pw-stop"></i><small>No media playing</small></div>',
-    cpu: () => ring('Total CPU Use', 5, '<span>Number of cores</span><span>12</span>'),
-    memory: () => ring('Memory Usage', 26, '<span>Used</span><span>4.1 GiB</span>'),
+    mediacontroller: RC.nowplaying, cpu: RC.cpu, memory: RC.memory,
     net: () => '<div class="pw-mon"><b>Network</b><span class="eq">' + '<i></i>'.repeat(8) + '</span></div>',
     disk: () => ring('Disk Usage', 74, '<span>/</span><span>441 GB</span>'),
-    calendar: cal,
+    calendar: RC.calendar,
     notes: () => '<div class="pw-note">cook rice</div>',
     puzzle: () => '<b>15</b><span>Puzzle</span>',
   };
   function renderLibrary(s) {
     space.querySelectorAll('.wlib').forEach((x) => x.remove());
     (s.extras.widgets || []).forEach((id, i) => {
-      const w = el('div', 'wlib pw', WLOOK[id] ? WLOOK[id]() : id);
+      const rcKind = (RB.catalog.WIDGETS.find((x) => x.id === id) || {}).kind;
+      const w = el('div', rcKind ? 'wlib rcw' : 'wlib pw', WLOOK[id] ? WLOOK[id]() : id);
       const pos = (s.extras.widgetPos || {})[id] || [3 + (i % 4) * 12, 8 + Math.floor(i / 4) * 16];
       w.style.left = pos[0] + '%'; w.style.top = pos[1] + '%';
       w.title = 'Drag me (in Plasma: right-click the desktop > Enter Edit Mode)';

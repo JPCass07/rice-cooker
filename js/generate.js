@@ -48,6 +48,7 @@
       spacer: '"org.kde.plasma.panelspacer"', clock: '"org.kde.plasma.digitalclock"', tray: '"org.kde.plasma.systemtray"',
       pager: '"org.kde.plasma.pager"', sep: '"org.kde.plasma.marginsseparator"', desk: '"org.kde.plasma.showdesktop"',
       gmenu: '"org.kde.plasma.appmenu"', media: '"org.kde.plasma.mediacontroller"',
+      rcdock: '["io.github.jpcass07.ricecooker", {General: {kind: "dock"}}]',
     };
     const P = (o) => `makePanel(${JSON.stringify(Object.assign({}, o, { widgets: undefined }))}, [${o.widgets.map((w) => W[w]).join(', ')}]);`;
     const layouts = {
@@ -56,7 +57,7 @@
         P({ location: 'bottom', height: 54, lengthMode: 'fit', alignment: 'center', floating: true, hiding: 'dodgewindows', widgets: ['tasks'] }),
       ],
       serpantinum: [
-        P({ location: 'top', height: 26, lengthMode: 'fill', floating: false, widgets: ['pager', 'spacer', 'clock', 'media', 'spacer', 'tray'] }),
+        P({ location: 'top', height: 26, lengthMode: 'fill', floating: false, widgets: ['pager', 'spacer', 'rcdock', 'spacer', 'tray'] }),
         P({ location: 'bottom', height: 44, lengthMode: 'fit', alignment: 'center', floating: true, hiding: 'dodgewindows', widgets: ['tasks'] }),
       ],
       island: [
@@ -65,7 +66,7 @@
       ],
       topdock: [
         P({ location: 'left', height: 44, lengthMode: 'fill', floating: true, widgets: ['menu', 'pager', 'tasks', 'spacer', 'tray'] }),
-        P({ location: 'top', height: 34, lengthMode: 'fit', alignment: 'center', floating: true, widgets: ['clock', 'media'] }),
+        P({ location: 'top', height: 34, lengthMode: 'fit', alignment: 'center', floating: true, widgets: ['rcdock'] }),
       ],
       leftbar: [P({ location: 'left', height: 46, lengthMode: 'fill', floating: true, widgets: ['menu', 'pager', 'tasks', 'spacer', 'tray', 'clock'] })],
       dock: [P({ location: 'bottom', height: 54, lengthMode: 'fit', alignment: 'center', floating: true, widgets: ['menu', 'tasks', 'sep', 'tray', 'clock'] })],
@@ -97,6 +98,7 @@ function makePanel(o, widgets) {
         w.currentConfigGroup = [g];
         for (var k in spec[1][g]) w.writeConfig(k, spec[1][g][k]);
       }
+      if (w.reloadConfig) w.reloadConfig();
     }
   }
   return p;
@@ -390,6 +392,23 @@ Parent=FALLBACK/`),
       step('animations', 'Animations and KWin effects', c, note);
     }
 
+    /* Rice Cooker's own Plasma widget: the cards and the top-dock pill */
+    {
+      const P = RB.plasmoid;
+      const uses = ['topdock', 'serpantinum'].includes(s.panel) || has('bigClock') || has('widgetColumn') ||
+        (s.extras.widgets || []).some((id) => (RB.catalog.WIDGETS.find((w) => w.id === id) || {}).kind);
+      if (uses) {
+        step('rcwidget', 'Rice Cooker widget (cards and top dock)', [
+          'PK="$HOME/.local/share/rice-cooker/plasmoid"',
+          'mkdir -p "$PK/contents/ui" "$PK/contents/config"',
+          `cat > "$PK/metadata.json" <<'META_EOF'\n${P.metadata}\nMETA_EOF`,
+          `cat > "$PK/contents/config/main.xml" <<'XML_EOF'\n${P.configXml.trim()}\nXML_EOF`,
+          `cat > "$PK/contents/ui/main.qml" <<'QML_EOF'\n${P.mainQml.trim()}\nQML_EOF`,
+          'kpackagetool6 -t Plasma/Applet --upgrade "$PK" >/dev/null 2>&1 || kpackagetool6 -t Plasma/Applet --install "$PK"',
+        ], 'Installs into your home folder (no password). Clock, greeting, now playing (any music player), live CPU/RAM/GPU rings, calendar and the top-dock pill, all coloured by the rice. Remove it with: kpackagetool6 -t Plasma/Applet --remove ' + P.ID);
+      }
+    }
+
     /* panels */
     if (s.panel !== 'keep') {
       step('panels', 'Panel layout', [
@@ -547,19 +566,19 @@ QML_EOF`,
        Every widget Rice Cooker adds is tagged, and the next cook removes the tagged
        ones first, so cooking again replaces them instead of stacking duplicates. */
     {
-      const items = []; // [plasmoid, x, y, w, h, kind]  x/y: pixels if kind is 'col'/'clock', else % of the screen
-      if (has('bigClock')) items.push(['org.kde.plasma.digitalclock', 'center', 140, 520, 220, 'clock']);
+      const RCW = 'io.github.jpcass07.ricecooker';
+      const items = []; // [plasmoid, x, y, w, h, place, cardKind]  x/y: pixels for 'col'/'clock', else % of the screen
+      if (has('bigClock')) items.push([RCW, 'center', 140, 520, 220, 'clock', 'clock']);
       const colIds = [];
       if (has('widgetColumn')) {
-        [['org.kde.plasma.weather', 150], ['org.kde.plasma.mediacontroller', 170], ['org.kde.plasma.systemmonitor.cpu', 150],
-          ['org.kde.plasma.systemmonitor.memory', 150], ['org.kde.plasma.calendar', 260]].forEach(([id, h]) => { colIds.push(id); items.push([id, 'right', h, 320, h, 'col']); });
+        [['greeting', 130], ['nowplaying', 140], ['rings', 130], ['calendar', 250]].forEach(([k, h]) => { colIds.push(k); items.push([RCW, 'right', h, 320, h, 'col', k]); });
       }
       const pos = s.extras.widgetPos || {};
       (s.extras.widgets || []).map((id) => RB.catalog.WIDGETS.find((w) => w.id === id)).filter(Boolean)
         .filter((w) => w.id !== 'weather' || has('addonWidgets'))
-        .filter((w) => !colIds.includes(w.plasmoid))               // already in the column
+        .filter((w) => !(w.kind && colIds.includes(w.kind)))       // already in the column
         .filter((w) => !(w.id === 'digitalclock' && has('bigClock')))
-        .forEach((w, i) => { const pp = pos[w.id] || [3 + (i % 4) * 12, 8 + Math.floor(i / 4) * 16]; items.push([w.plasmoid, pp[0], pp[1], w.size[0], w.size[1], 'lib']); });
+        .forEach((w, i) => { const pp = pos[w.id] || [3 + (i % 4) * 12, 8 + Math.floor(i / 4) * 16]; items.push([w.plasmoid, pp[0], pp[1], w.size[0], w.size[1], 'lib', w.kind || '']); });
       const unit = s.extras.tempUnit === 'F' ? 6002 : 6001; // KUnitConversion: Celsius 6001, Fahrenheit 6002
       const js = `var g = screenGeometry(0);
 var items = [
@@ -585,6 +604,7 @@ for (var i = 0; i < ds.length; i++) {
     var w = ds[i].addWidget(it[0], x, y, it[3], it[4]);
     w.currentConfigGroup = ["RiceCooker"];
     w.writeConfig("added", "yes");
+    if (it[6]) { w.currentConfigGroup = ["General"]; w.writeConfig("kind", it[6]); w.writeConfig("clock24", true); if (w.reloadConfig) w.reloadConfig(); }
     if (it[0] === "org.kde.plasma.digitalclock") {
       w.currentConfigGroup = ["Appearance"];
       w.writeConfig("showDate", true);

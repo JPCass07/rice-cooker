@@ -166,6 +166,25 @@
 .pw-weather b { font-size: .85cqi; }
 .wcol { gap: .5cqi !important; }
 
+/* Rice Cooker cards (match js/plasmoid.js) */
+.rcw { background: none !important; border: 0 !important; padding: 0 !important; backdrop-filter: none !important; cursor: grab; }
+.rc-card { background: color-mix(in srgb, var(--p-bg2) 86%, transparent); border: 1px solid color-mix(in srgb, var(--p-fg) 10%, transparent); border-radius: 1cqi; padding: .9cqi 1cqi; color: var(--p-fg); font-size: 1cqi; display: flex; gap: .5cqi; min-width: 12cqi; }
+.rc-card b { font-weight: 600; } .rc-card span { color: var(--p-dim); }
+.rc-greet { flex-direction: column; } .rc-greet em { font-style: normal; color: var(--p-accent); font-weight: 700; font-size: 2cqi; margin-top: .4cqi; }
+.rc-music { align-items: center; gap: .9cqi; } .rc-music > div { display: flex; flex-direction: column; gap: .3cqi; flex: 1; min-width: 0; }
+.rc-music .art { width: 5cqi; height: 5cqi; border-radius: .6cqi; }
+.rc-ctl { display: flex; justify-content: space-between; align-items: center; color: var(--p-fg) !important; letter-spacing: .4cqi; }
+.rc-rings { justify-content: space-around; }
+.rc-ring { display: flex; flex-direction: column; align-items: center; gap: .3cqi; font-size: .85cqi; }
+.rc-ring .wl-ring { width: 4cqi; height: 4cqi; display: grid; place-items: center; -webkit-mask: none; mask: none; position: relative; }
+.rc-ring .wl-ring::after { content: ''; position: absolute; inset: .45cqi; border-radius: 50%; background: color-mix(in srgb, var(--p-bg2) 96%, transparent); }
+.rc-ring .wl-ring b { position: relative; z-index: 1; font-size: .9cqi; color: var(--p-fg); }
+.rc-cal { flex-direction: column; } .rc-cal .days { display: grid; grid-template-columns: repeat(7, 1fr); gap: .2cqi; text-align: center; font-size: .75cqi; }
+.rc-cal .days i { font-style: normal; color: var(--p-dim); aspect-ratio: 1; display: grid; place-items: center; }
+.rc-cal .days i.on { background: var(--p-accent); color: var(--p-on-accent); border-radius: 50%; }
+.rc-clock { font: 700 6cqi/1 var(--ui-font), sans-serif; color: var(--p-fg); text-align: center; text-shadow: 0 .3cqi 1.2cqi rgba(0,0,0,.35); }
+.rc-clock small { display: block; font-size: 1.1cqi; color: var(--p-dim); letter-spacing: .2cqi; font-weight: 500; margin-top: .5cqi; }
+
 /* windows */
 .win {
   position: absolute; border-radius: var(--rad); overflow: hidden; z-index: 3;

@@ -339,15 +339,20 @@
 
   /* Desktop widget library. Plasma widget IDs checked on Plasma 6.3 (Debian 13). */
   const WIDGETS = [
-    { id: 'digitalclock', name: 'Digital clock', plasmoid: 'org.kde.plasma.digitalclock', size: [300, 150] },
+    // Rice Cooker cards (styled like the preview, coloured by the rice)
+    { id: 'digitalclock', name: 'Clock', plasmoid: 'io.github.jpcass07.ricecooker', kind: 'clock', size: [420, 180] },
+    { id: 'greeting', name: 'Greeting', plasmoid: 'io.github.jpcass07.ricecooker', kind: 'greeting', size: [300, 150] },
+    { id: 'mediacontroller', name: 'Now playing', plasmoid: 'io.github.jpcass07.ricecooker', kind: 'nowplaying', size: [340, 140] },
+    { id: 'rings', name: 'CPU, RAM, GPU', plasmoid: 'io.github.jpcass07.ricecooker', kind: 'rings', size: [320, 140] },
+    { id: 'cpu', name: 'CPU ring', plasmoid: 'io.github.jpcass07.ricecooker', kind: 'cpu', size: [160, 160] },
+    { id: 'memory', name: 'RAM ring', plasmoid: 'io.github.jpcass07.ricecooker', kind: 'memory', size: [160, 160] },
+    { id: 'gpu', name: 'GPU ring', plasmoid: 'io.github.jpcass07.ricecooker', kind: 'gpu', size: [160, 160] },
+    { id: 'calendar', name: 'Calendar', plasmoid: 'io.github.jpcass07.ricecooker', kind: 'calendar', size: [300, 260] },
+    // stock Plasma widgets
     { id: 'analogclock', name: 'Analog clock', plasmoid: 'org.kde.plasma.analogclock', size: [200, 200] },
     { id: 'weather', name: 'Weather', plasmoid: 'org.kde.plasma.weather', size: [300, 160] },
-    { id: 'mediacontroller', name: 'Now playing', plasmoid: 'org.kde.plasma.mediacontroller', size: [320, 180] },
-    { id: 'cpu', name: 'CPU usage', plasmoid: 'org.kde.plasma.systemmonitor.cpu', size: [220, 160] },
-    { id: 'memory', name: 'Memory usage', plasmoid: 'org.kde.plasma.systemmonitor.memory', size: [220, 160] },
     { id: 'net', name: 'Network speed', plasmoid: 'org.kde.plasma.systemmonitor.net', size: [260, 160] },
     { id: 'disk', name: 'Disk usage', plasmoid: 'org.kde.plasma.systemmonitor.diskusage', size: [220, 160] },
-    { id: 'calendar', name: 'Calendar', plasmoid: 'org.kde.plasma.calendar', size: [300, 280] },
     { id: 'notes', name: 'Sticky note', plasmoid: 'org.kde.plasma.notes', size: [240, 220] },
     { id: 'puzzle', name: '15 puzzle', plasmoid: 'org.kde.plasma.fifteenpuzzle', size: [240, 240] },
   ];
